@@ -2,13 +2,12 @@ const { PrismaClient } = require("@prisma/client");
 const AppError = require("../utils/AppError");
 const httpStatus = require("../utils/httpStatusText");
 const validatorMiddleware = require("../middleware/validatorMiddleware");
-const emailValidator = require("../utils/validators/emailValidator")
+const emailValidator = require("../utils/validators/emailValidator");
 const asyncHandler = require("express-async-handler");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const { token } = require("morgan");
 const { generateJWT } = require("../utils/generateJWT");
-
 
 const prisma = new PrismaClient();
 
@@ -21,7 +20,7 @@ exports.getAllUsers = asyncHandler(async (req, res, next) => {
     skip,
     take: limit,
     select: {
-      id: true,
+      userId: true,
       first_name: true,
       last_name: true,
       email: true,
@@ -73,7 +72,11 @@ exports.register = asyncHandler(async (req, res, next) => {
     },
   });
 
-  const token = await generateJWT({ email: newUser.email, id: newUser.id, role: newUser.role });
+  const token = await generateJWT({
+    email: newUser.email,
+    id: newUser.id,
+    role: newUser.role,
+  });
   newUser.token = token;
 
   return res.status(200).json({
@@ -100,7 +103,11 @@ exports.login = asyncHandler(async (req, res, next) => {
   const matchedPassword = await bcrypt.compare(password, user.password);
 
   if (matchedPassword) {
-    const token = await generateJWT({ email: user.email, id: user._id , role: user.role}); // Fix here
+    const token = await generateJWT({
+      email: user.email,
+      id: user._id,
+      role: user.role,
+    }); 
     return res.status(200).json({ status: "Success", data: { token } });
   } else {
     return next(

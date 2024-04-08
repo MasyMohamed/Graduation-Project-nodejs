@@ -20,7 +20,8 @@ const verifyToken = asyncHandler(async (req, res, next) => {
 
   try {
     const decoded = jwt.verify(token, secret);
-    req.currentUser = decoded; // Set currentUser to the decoded token
+    req.currentUser = decoded;
+    console.log(decoded)
     next();
   } catch (error) {
     console.error("Error verifying token:", error);

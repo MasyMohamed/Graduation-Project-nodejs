@@ -8,136 +8,199 @@ datasource db {
 }
 
 model User {
-  id              Int               @id @default(autoincrement())
-  first_name      String
-  last_name       String
-  email           String            @unique @db.VarChar(255)
-  password        String
-  address         String?           @db.VarChar(255)
-  Address         Address[]
-  DeliveryPartner DeliveryPartner[]
-  SkinProfile     SkinProfile[]
-  role            Role              @default(USER)
-  avatar          String?           @default("/uploads/avatar2.png")
+  userId            Int              @id @default(autoincrement())
+  first_name        String
+  last_name         String
+  email             String           @unique @db.VarChar(255)
+  password          String
+  address           String?          @db.VarChar(255)
+  Address           Address[]
+  DeliveryPartner   DeliveryPartner[]
+  SkinProfile       SkinProfile[]
+  role              Role             @default(USER)
+  avatar            String?          @default("/uploads/avatar2.png")
+  carts             Cart[]
+  orders            Order[]
+  admins            Admin[]  
+  userFavorite UserFavorite[]
+       
+
 
   @@map("User")
 }
 
 model Product {
-  id                Int     @id @default(autoincrement())
+  id                Int       @id @default(autoincrement())
   name              String
-  price             Decimal
+  price             Float
   brand             String
-  category          String
+  categoryId        Int       
   product_image_url String
   description       String
   skin_type         String
   stock_quantity    Int
+  category          Category  @relation(fields: [categoryId], references: [id])
+  orderItems        OrderItem[]
+  cartItems         CartItem[]
+  skinProfiles      SkinProfile[]  @relation("RecommendedProducts")
+  userFavorite UserFavorite[]
 
   @@map("Product")
 }
 
+
+model Category {
+id                Int       @id @default(autoincrement())
+  name              String
+  products          Product[]
+}
+
 model Cart {
-  id         Int        @id @default(autoincrement())
-  totalPrice Float
-  cartItems  CartItem[]
+  cartId            Int              @id @default(autoincrement())
+  totalPrice        Float
+  userId            Int
+  user              User             @relation(fields: [userId], references: [userId])
+  cartItems         CartItem[]
+  order             Order?           @relation(fields: [orderId],references: [orderId])
+  orderId           Int?             @unique
 }
 
 model CartItem {
-  id       Int    @id @default(autoincrement())
-  name     String
-  price    Float
-  quantity Int
-  cartId   Int
-  cart     Cart   @relation(fields: [cartId], references: [id])
+  itemId            Int              @id @default(autoincrement())
+  productId         Int
+  product           Product          @relation(fields: [productId], references: [id])
+  quantity          Int
+  cartId            Int
+  cart              Cart             @relation(fields: [cartId], references: [cartId])
+
+  @@map("CartItem")
 }
 
 model SkinProfile {
-  id         Int     @id @default(autoincrement())
-  skinType   String
-  user_id    Int?
-  first_name String? @db.VarChar(255)
-  last_name  String? @db.VarChar(255)
-  User       User?   @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  profileId         Int              @id @default(autoincrement())
+  skinType          String
+  user_id           Int?
+  first_name        String?          @db.VarChar(255)
+  last_name         String?          @db.VarChar(255)
+  User              User?            @relation(fields: [user_id], references: [userId], onDelete: NoAction, onUpdate: NoAction)
+  recommendations   Product[]        @relation("RecommendedProducts")
+
 }
 
-model Recommendation {
-  id Int @id @default(autoincrement())
-}
+model OrderItem {
+  itemId            Int              @id @default(autoincrement())
+  productId         Int
+  product           Product          @relation(fields: [productId], references: [id])
+  quantity          Int
+  subtotal          Float
+  orderId           Int
+  order             Order            @relation(fields: [orderId], references: [orderId])
 
-model ProductManager {
-  id            Int     @id @default(autoincrement())
-  firstName     String
-  lastName      String
-  email         String  @unique
-  password      String
-  contactNumber String
-  loginStatus   Boolean
-}
-
-model OrderItems {
-  id       Int   @id @default(autoincrement())
-  quantity Int
-  subtotal Float
+  @@map("OrderItem")
 }
 
 model Payment {
-  id          Int      @id @default(autoincrement())
-  status      String
-  amount      Float
-  paymentDate DateTime
+  paymentId         Int              @id @default(autoincrement())
+  status            String
+  amount            Float
+  paymentDate       DateTime
+  orderId           Int
+  order             Order            @relation(fields: [orderId], references: [orderId])
+
+  @@map("Payment")
 }
 
 model Address {
-  id      Int    @id @default(autoincrement())
-  street  String
-  city    String
-  user_id Int?
-  User    User?  @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  addressId         Int              @id @default(autoincrement())
+  street            String
+  city              String
+  user_id           Int?
+  User              User?            @relation(fields: [user_id], references: [userId], onDelete: NoAction, onUpdate: NoAction)
+  orders            Order[]
 }
 
 model Order {
-  id          Int      @id @default(autoincrement())
-  date        DateTime
-  totalAmount Float
-  status      String
+  orderId           Int              @id @default(autoincrement())
+  date              DateTime
+  totalAmount       Float
+  status            String
+  userId            Int
+  user              User?            @relation(fields: [userId], references: [userId])
+  orderItems        OrderItem[]
+  paymentId         Int
+  payment           Payment[]
+  addressId         Int
+  address           Address?         @relation(fields: [addressId], references: [addressId])
+  shipping          Shipping[]
+  cart              Cart[]
 }
 
 model Shipping {
-  id           Int       @id @default(autoincrement())
-  status       String
-  shippingDate DateTime
-  estimateDate DateTime
-  actualDate   DateTime?
-}
+  shippingId        Int              @id @default(autoincrement())
+  status            String
+  shippingDate      DateTime
+  estimateDate      DateTime
+  actualDate        DateTime?
+  orderId           Int
+  order             Order            @relation(fields: [orderId], references: [orderId])
+  deliveryPartnerId Int
+  deliveryPartner   DeliveryPartner  @relation(fields: [deliveryPartnerId], references: [deliveryPartnerId])
+  
 
-model Admin {
-  id            Int     @id @default(autoincrement())
-  firstName     String
-  lastName      String
-  email         String  @unique
-  password      String
-  contactNumber String
-  loginStatus   Boolean
+  @@map("Shipping")
 }
 
 model DeliveryPartner {
-  id          Int    @id @default(autoincrement())
-  fullName    String
-  phoneNumber String
-  user_id     Int?
-  User        User?  @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  deliveryPartnerId Int              @id @default(autoincrement())
+  fullName          String
+  phoneNumber       String
+  shipping          Shipping[]
+  admins            Admin[]          
+  users             User[]  
+
+
+  @@map("DeliveryPartner")
 }
 
-model Delivery {
-  id     Int      @id @default(autoincrement())
-  date   DateTime
-  notes  String
-  status String
+model ProductManager {
+  productMangerId   Int              @id @default(autoincrement())
+  firstName         String
+  lastName          String
+  email             String           @unique
+  password          String
+  contactNumber     String
+  loginStatus       Boolean
+  admins            Admin[]
+
+  @@map("ProductManager")
+}
+
+model Admin {
+  adminId           Int              @id @default(autoincrement())
+  firstName         String
+  lastName          String
+  email             String           @unique
+  password          String
+  contactNumber     String
+  loginStatus       Boolean
+  productManagers   ProductManager[]
+  deliveryPartners  DeliveryPartner[]
+  users             User[]
+
+  @@map("Admin")
 }
 
 enum Role {
   ADMIN
   USER
   PRODUCT_MANAGER
+  DELIVERYPARTNER
 }
+model UserFavorite {
+  id       Int     @id @default(autoincrement())
+  userId   Int
+  productId Int
+  user     User    @relation(fields: [userId], references: [userId])
+  product  Product @relation(fields: [productId], references: [id])
+}
+

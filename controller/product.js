@@ -24,35 +24,61 @@ exports.getProduct = asyncHandler(async (req, res, next) => {
   const product = await prisma.product.findUnique({ where: { id: productId } });
 
   if (!product) {
-        return next(new AppError("Product not found", 404));
+    return next(new AppError("Product not found", 404));
   }
   res.status(200).json({ status: httpStatus.Success, data: product });
 });
 
 exports.createProduct = asyncHandler(async (req, res, next) => {
-  validatorMiddleware(req, res, async (err) => {
-    if (err) {
-      return next(err); 
-    } else {
-      const existingProduct = await prisma.product.findUnique({
-        where: { id: req.body.id },
-      });
+  const {
+    name,
+    price,
+    brand,
+    categoryId,
+    product_image_url,
+    description,
+    skin_type,
+    stock_quantity,
+  } = req.body;
 
-      if (existingProduct) {
-        
-        return next(new Error("Product with this ID already exists"));
-      }
-
-      // Create the product with the provided ID
-      const product = await prisma.product.create({
-        data: req.body,
-      });
-
-      res.status(201).json({ status: httpStatus.Success, data: { product } });
+  try {
+    // Validate presence of categoryId
+    if (!categoryId) {
+      return res
+        .status(400)
+        .json({ status: "Error", message: "Missing category ID" });
     }
-  });
-});
 
+    const existingCategory = await prisma.category.findUnique({
+      where: { id: categoryId }, // Assuming "id" is the primary key for Category
+    });
+
+    if (!existingCategory) {
+      return res
+        .status(400)
+        .json({ status: "Error", message: "Invalid category ID" });
+    }
+
+    const productData = {
+      name,
+      price,
+      brand,
+      category: { connect: { id: categoryId } },
+      product_image_url,
+      description,
+      skin_type,
+      stock_quantity,
+    };
+
+    const product = await prisma.product.create({
+      data: productData,
+    });
+
+    res.status(201).json({ status: "Success", data: product });
+  } catch (error) {
+    next(error);
+  }
+});
 
 exports.updateProduct = asyncHandler(async (req, res, next) => {
   validatorMiddleware(req, res, async (err) => {
@@ -61,7 +87,7 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
     }
 
     const productId = parseInt(req.params.id);
-    const updatedProductData = req.body; 
+    const updatedProductData = req.body;
 
     const product = await prisma.product.update({
       where: { id: productId },
@@ -69,7 +95,7 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
     });
 
     if (!product) {
-      return next(new AppError(404,"Product not found"));
+      return next(new AppError(404, "Product not found"));
     }
 
     res.status(200).json({ status: httpStatus.Success, data: product });
@@ -77,18 +103,17 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
 });
 
 exports.deleteProduct = asyncHandler(async (req, res, next) => {
-  const productId = parseInt(req.params.id);
 
   const productToDelete = await prisma.product.findUnique({
-    where: { id: productId },
+    where: { id: parseInt(req.params.id) },
   });
 
   if (!productToDelete) {
     return next(new AppError("Product not found", 404));
   }
 
-  const deletedProduct = await prisma.product.delete({
-    where: { id: productId },
+  await prisma.product.delete({
+    where: { id: parseInt(req.params.id) },
   });
 
   res.status(200).json({

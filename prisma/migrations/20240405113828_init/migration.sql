@@ -21,13 +21,21 @@ CREATE TABLE "Product" (
     "name" TEXT NOT NULL,
     "price" DECIMAL(65,30) NOT NULL,
     "brand" TEXT NOT NULL,
-    "category" TEXT NOT NULL,
     "product_image_url" TEXT NOT NULL,
     "description" TEXT NOT NULL,
     "skin_type" TEXT NOT NULL,
     "stock_quantity" INTEGER NOT NULL,
+    "categoryId" INTEGER NOT NULL,
 
     CONSTRAINT "Product_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "Category" (
+    "id" SERIAL NOT NULL,
+    "name" TEXT NOT NULL,
+
+    CONSTRAINT "Category_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -171,6 +179,9 @@ CREATE UNIQUE INDEX "ProductManager_email_key" ON "ProductManager"("email");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "Admin_email_key" ON "Admin"("email");
+
+-- AddForeignKey
+ALTER TABLE "Product" ADD CONSTRAINT "Product_categoryId_fkey" FOREIGN KEY ("categoryId") REFERENCES "Category"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "CartItem" ADD CONSTRAINT "CartItem_cartId_fkey" FOREIGN KEY ("cartId") REFERENCES "Cart"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
