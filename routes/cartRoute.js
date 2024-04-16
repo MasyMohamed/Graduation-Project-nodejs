@@ -2,7 +2,6 @@ const express = require("express");
 const router = express.Router();
 const authMiddleware = require("../middleware/verifyToken");
 const cartController = require("../controller/cart");
-const verifyToken = require("../middleware/verifyToken");
 
 router.post("/add-item",authMiddleware, cartController.addItemToCart);
 router.delete("/remove-item/:itemId",authMiddleware, cartController.removeItemFromCart);
