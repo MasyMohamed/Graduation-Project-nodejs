@@ -7,6 +7,9 @@ const {
   updateProduct,
   deleteProduct,
 } = require("../controller/product");
+const { addProductToFavorites,
+  getAllFavoriteProducts
+} = require("../controller/addToFav");
 const { validateProduct } = require("../utils/validators/productValidator");
 const verifyToken = require("../middleware/verifyToken");
 const allowedTo = require("../middleware/allowedTo");
@@ -19,7 +22,7 @@ router
     verifyToken,
     allowedTo(userRoles.ADMIN, userRoles.PRODUCT_MANAGER),
     createProduct
-  );
+)
 
 router
   .route("/:id")
@@ -31,6 +34,8 @@ router
     deleteProduct
   );
 
+router.route('/fav').post(verifyToken,addProductToFavorites)
+router.route("/fav/:userId").get(verifyToken,getAllFavoriteProducts);
 
 
 
