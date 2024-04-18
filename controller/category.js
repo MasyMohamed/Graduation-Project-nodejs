@@ -72,7 +72,7 @@ const addProductToCategory = asyncHandler(async (req, res) => {
   }
 
   const product = await prisma.product.findUnique({
-    where: { id: parseInt(productId) },
+    where: { id: parseInt(productId) }, 
   });
 
   if (!product) {
@@ -93,7 +93,6 @@ const addProductToCategory = asyncHandler(async (req, res) => {
     message: "Product added to category successfully",
   });
 });
-
 
 
 module.exports = {
