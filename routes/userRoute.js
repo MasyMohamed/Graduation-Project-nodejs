@@ -1,8 +1,6 @@
 const express = require("express");
 const router = express.Router();
 const userController = require("../controller/userController");
-const verifyToken = require("../middleware/verifyToken");
-
 const multer = require("multer");
 
 const storage = multer.diskStorage({
@@ -30,7 +28,6 @@ const upload = multer({
 });
 
 router.get("/",
-  verifyToken,
   userController.getAllUsers);
 
 router.post("/login",
