@@ -11,14 +11,11 @@ const { addProductToFavorites,
   getAllFavoriteProducts
 } = require("../controller/addToFav");
 const { validateProduct } = require("../utils/validators/productValidator");
-const allowedTo = require("../middleware/allowedTo");
-const userRoles = require("../utils/userRoles");
 
 router
   .route("/")
   .get(getAllProducts)
   .post(
-    allowedTo(userRoles.ADMIN, userRoles.PRODUCT_MANAGER),
     createProduct
 )
 
@@ -27,7 +24,6 @@ router
   .get(validateProduct,getProduct)
   .patch( validateProduct, updateProduct)
   .delete(
-    allowedTo(userRoles.ADMIN, userRoles.PRODUCT_MANAGER),
     deleteProduct
   );
 

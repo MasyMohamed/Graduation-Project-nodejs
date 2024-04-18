@@ -2,8 +2,6 @@ const express = require("express");
 const router = express.Router();
 const categoryController = require("../controller/category");
 const { validateProduct } = require("../utils/validators/productValidator");
-const allowedTo = require("../middleware/allowedTo");
-const userRoles = require("../utils/userRoles");
 
 router
   .route("/")
