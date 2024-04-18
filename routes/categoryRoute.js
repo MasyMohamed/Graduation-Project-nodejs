@@ -17,7 +17,7 @@ router
   );
 
 router
-  .route("/:id/products")
+  .route("/:categoryId/products")
   .post(categoryController.addProductToCategory);
 
 

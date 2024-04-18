@@ -253,20 +253,19 @@ exports.addOrderItemToOrder = asyncHandler(async (req, res, next) => {
     .json({ message: "Order item added to order successfully", orderItem });
 });
 exports.removeOrderItemFromOrder = asyncHandler(async (req, res, next) => {
-  const { orderItemId } = req.params;
+  const { ItemId } = req.params;
 
   // Check if the order item exists
   const orderItem = await prisma.orderItem.findUnique({
-    where: { itemId: parseInt(orderItemId) },
+    where: { itemId: parseInt(ItemId) },
   });
 
   if (!orderItem) {
     return next(new AppError("Order item not found", 404));
   }
 
-  // Delete the order item
   await prisma.orderItem.delete({
-    where: { itemId: parseInt(orderItemId) },
+    where: { itemId: parseInt(ItemId) },
   });
 
   res.status(200).json({ message: "Order item removed from order successfully" });

@@ -15,7 +15,7 @@ router.post(
   orderController.addOrderItemToOrder
 );
 router.delete(
-  "/delete-from-order/:orderItemId",
+  "/deleteOrder/:ItemId",
   orderController.removeOrderItemFromOrder
 );
 
