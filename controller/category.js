@@ -24,14 +24,19 @@ const getCategoryById = asyncHandler(async (req, res) => {
 });
 
 const createCategory = asyncHandler(async (req, res) => {
-  const { name } = req.body;
-  const category = await prisma.category.create({ data: { name } });
+  const { name, image_url } = req.body;
+  const category = await prisma.category.create({
+    data: {
+      name,
+      category_image_url: image_url
+    }
+  });
   res.status(201).json({ status: httpStatusText.Success, data: category });
 });
 
 const updateCategory = asyncHandler(async (req, res) => {
   const { id } = req.params;
-  const { name } = req.body;
+  const { name, } = req.body;
   const updatedCategory = await prisma.category.update({
     where: { id: parseInt(id) },
     data: { name },
