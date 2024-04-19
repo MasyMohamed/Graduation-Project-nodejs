@@ -208,5 +208,3 @@ model SavedCartItem {
   quantity   Int
   userId     Int
 }
-
-

@@ -34,6 +34,7 @@ CREATE TABLE "Product" (
 CREATE TABLE "Category" (
     "id" SERIAL NOT NULL,
     "name" TEXT NOT NULL,
+    "category_image_url" TEXT NOT NULL,
 
     CONSTRAINT "Category_pkey" PRIMARY KEY ("id")
 );
@@ -169,6 +170,16 @@ CREATE TABLE "UserFavorite" (
     "productId" INTEGER NOT NULL,
 
     CONSTRAINT "UserFavorite_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "SavedCartItem" (
+    "id" SERIAL NOT NULL,
+    "productId" INTEGER NOT NULL,
+    "quantity" INTEGER NOT NULL,
+    "userId" INTEGER NOT NULL,
+
+    CONSTRAINT "SavedCartItem_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
