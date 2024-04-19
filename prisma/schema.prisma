@@ -14,7 +14,7 @@ model User {
   email             String           @unique @db.VarChar(255)
   password          String
   address           String?          @db.VarChar(255)
-  Address           Address[]
+  addresses         Address[]
   DeliveryPartner   DeliveryPartner[]
   SkinProfile       SkinProfile[]
   role              Role             @default(USER)
@@ -22,11 +22,7 @@ model User {
   carts             Cart[]
   orders            Order[]
   admins            Admin[]  
-  userFavorite UserFavorite[]
-       
-
-
-  @@map("User")
+  userFavorite      UserFavorite[]
 }
 
 model Product {
@@ -43,10 +39,9 @@ model Product {
   orderItems        OrderItem[]
   cartItems         CartItem[]
   skinProfiles      SkinProfile[]  @relation("RecommendedProducts")
-  userFavorite UserFavorite[]
-
-  @@map("Product")
+  userFavorite       UserFavorite[]
 }
+
 model Category {
   id                Int       @id @default(autoincrement())
   name              String
