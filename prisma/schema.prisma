@@ -17,7 +17,7 @@ model User {
   addresses         Address[]
   DeliveryPartner   DeliveryPartner[]
   SkinProfile       SkinProfile[]
-  role              Role             @default(USER)
+  role              UserRole         @default(USER)
   avatar            String?          @default("/uploads/avatar2.png")
   carts             Cart[]
   orders            Order[]
@@ -183,7 +183,7 @@ model Admin {
   @@map("Admin")
 }
 
-enum Role {
+enum UserRole {
   ADMIN
   USER
   PRODUCT_MANAGER
