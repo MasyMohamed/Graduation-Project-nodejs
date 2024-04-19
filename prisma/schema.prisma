@@ -50,6 +50,7 @@ model Product {
 model Category {
   id                Int       @id @default(autoincrement())
   name              String
+  category_image_url String
   products          Product[]
 }
 

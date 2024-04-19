@@ -52,3 +52,31 @@ exports.getAllFavoriteProducts = asyncHandler(async (req, res, next) => {
   res.status(200).json({ favoriteProducts });
 });
 
+exports.removeProductFromFavorites = asyncHandler(async (req, res, next) => {
+  const {id, userId, productId } = req.body;
+
+  const existingFavorite = await prisma.userFavorite.findUnique({
+    where: {
+      id,
+      userId: userId,
+      productId: productId,
+    },
+  });
+
+  if (!existingFavorite) {
+    return next(
+      new AppError("Product not found in favorites", httpStatusText.NotFound)
+    );
+  }
+
+  await prisma.userFavorite.delete({
+    where: {
+      id: existingFavorite.id,
+    },
+  });
+
+  res.status(200).json({ message: "Product removed from favorites" });
+});
+
+
+

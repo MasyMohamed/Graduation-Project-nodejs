@@ -8,7 +8,8 @@ const {
   deleteProduct,
 } = require("../controller/product");
 const { addProductToFavorites,
-  getAllFavoriteProducts
+  getAllFavoriteProducts,
+  removeProductFromFavorites
 } = require("../controller/addToFav");
 const { validateProduct } = require("../utils/validators/productValidator");
 
@@ -29,7 +30,7 @@ router
 
 router.route('/fav').post(addProductToFavorites)
 router.route("/fav/:userId").get(getAllFavoriteProducts);
-
+router.route("/fav/remove").post(removeProductFromFavorites);
 
 
 module.exports = router;
