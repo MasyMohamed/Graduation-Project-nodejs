@@ -99,6 +99,19 @@ const addProductToCategory = asyncHandler(async (req, res) => {
   });
 });
 
+const getProductsByCategory = asyncHandler(async (req, res, next) => {
+  const id = req.params.id;
+
+  const products = await prisma.product.findMany({
+    where: {
+      categoryId: parseInt(id),
+    },
+  });
+
+  res.status(200).json({ products });
+});
+
+
 
 module.exports = {
   getAllCategories,
@@ -107,5 +120,6 @@ module.exports = {
   updateCategory,
   deleteCategory,
   addProductToCategory,
+  getProductsByCategory,
 };
 

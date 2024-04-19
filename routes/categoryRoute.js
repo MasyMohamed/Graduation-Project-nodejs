@@ -12,9 +12,12 @@ router
   .route("/:id")
   .get(categoryController.getCategoryById)
   .patch( validateProduct, categoryController.updateCategory)
-  .delete(
-    categoryController.deleteCategory
-  );
+  .delete(categoryController.deleteCategory)
+
+router
+.route("/:id/products")  
+  .get(categoryController.getProductsByCategory);
+
 
 router
   .route("/products")
