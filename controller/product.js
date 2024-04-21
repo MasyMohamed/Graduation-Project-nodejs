@@ -6,15 +6,9 @@ const validatorMiddleware = require("../middleware/validatorMiddleware");
 const prisma = new PrismaClient();
 
 exports.getAllProducts = asyncHandler(async (req, res) => {
-  const page = +req.query.page || 1;
-  const limit = +req.query.limit || 10;
-  const skip = (page - 1) * limit;
 
-  const products = await prisma.product.findMany({
-    skip,
-    take: limit,
-  });
-  res.status(200).json({ status: httpStatus.Success, page, data: products });
+  const products = await prisma.product.findMany();
+  res.status(200).json({ status: httpStatus.Success, data: products });
 });
 
 exports.getProduct = asyncHandler(async (req, res, next) => {
