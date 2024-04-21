@@ -31,7 +31,6 @@ const getCategoryById = asyncHandler(async (req, res) => {
   res.json({ status: httpStatusText.Success, data: categoryWithProducts });
 });
 
-
 const createCategory = asyncHandler(async (req, res) => {
   const { name, image_url } = req.body;
   const category = await prisma.category.create({
