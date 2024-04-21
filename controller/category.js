@@ -7,21 +7,8 @@ const prisma = new PrismaClient();
 
 const getAllCategories = asyncHandler(async (req, res) => {
   const categories = await prisma.category.findMany();
-
-  const categoriesWithProducts = await Promise.all(
-    categories.map(async (category) => {
-      const products = await prisma.product.findMany({
-        where: {
-          categoryId: category.id,
-        },
-      });
-      return { ...category, products };
-    })
-  );
-
-  res.json({ status: httpStatusText.Success, data: categoriesWithProducts });
+  res.json({ status: httpStatusText.Success, data: categories });
 });
-
 
 const getCategoryById = asyncHandler(async (req, res) => {
   const { id } = req.params;
@@ -33,8 +20,17 @@ const getCategoryById = asyncHandler(async (req, res) => {
     throw new AppError("Category not found", 404);
   }
 
-  res.json({ status: httpStatusText.Success, data: category });
+  const products = await prisma.product.findMany({
+    where: {
+      categoryId: parseInt(id),
+    },
+  });
+
+  const categoryWithProducts = { ...category, products };
+
+  res.json({ status: httpStatusText.Success, data: categoryWithProducts });
 });
+
 
 const createCategory = asyncHandler(async (req, res) => {
   const { name, image_url } = req.body;
@@ -112,6 +108,20 @@ const addProductToCategory = asyncHandler(async (req, res) => {
   });
 });
 
+const getProductsByCategory = asyncHandler(async (req, res, next) => {
+  const id = req.params.id;
+
+  const products = await prisma.product.findMany({
+    where: {
+      categoryId: parseInt(id),
+    },
+  });
+
+  res.status(200).json({ products });
+});
+
+
+
 module.exports = {
   getAllCategories,
   getCategoryById,
@@ -119,5 +129,6 @@ module.exports = {
   updateCategory,
   deleteCategory,
   addProductToCategory,
+  getProductsByCategory,
 };
 
