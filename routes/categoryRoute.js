@@ -15,11 +15,6 @@ router
   .delete(categoryController.deleteCategory)
 
 router
-.route("/:id/products")  
-  .get(categoryController.getProductsByCategory);
-
-
-router
   .route("/products")
   .post(categoryController.addProductToCategory);
 
