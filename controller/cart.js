@@ -5,19 +5,20 @@ const httpStatusText = require("../utils/httpStatusText");
 const AppError = require("../utils/AppError");
 
 exports.addItemToCart = asyncHandler(async (req, res) => {
-  const { productId, quantity } = req.body;
+  const { firebaseId, productId } = req.body;
+  const defaultQuantity = 1; 
 
-  if (!req.currentUser) {
+  if (!firebaseId) {
     return res.status(401).json({ error: "User not authenticated" });
   }
 
   let cart = await prisma.cart.findFirst({
-    where: { firebaseId: req.currentUser.firebaseId },
+    where: { firebaseId: firebaseId },
   });
 
   if (!cart) {
     cart = await prisma.cart.create({
-      data: { firebaseId: req.currentUser.firebaseId },
+      data: { firebaseId: firebaseId },
     });
   }
 
@@ -31,7 +32,7 @@ exports.addItemToCart = asyncHandler(async (req, res) => {
 
   const cartItem = await prisma.cartItem.create({
     data: {
-      quantity: quantity,
+      quantity: defaultQuantity,
       productId: productId,
       cartId: cart.cartId,
     },
@@ -42,9 +43,20 @@ exports.addItemToCart = asyncHandler(async (req, res) => {
 
 exports.removeItemFromCart = asyncHandler(async (req, res) => {
   const { itemId } = req.params;
+
+  const cartItem = await prisma.cartItem.findUnique({
+    where: { itemId: parseInt(itemId) },
+    include: { cart: true }, 
+  });
+
+  if (!cartItem) {
+    return res.status(404).json({ error: "Item not found in cart" });
+  }
+
   await prisma.cartItem.delete({
     where: { itemId: parseInt(itemId) },
   });
+
   res.json({ message: "Item removed from cart successfully" });
 });
 
