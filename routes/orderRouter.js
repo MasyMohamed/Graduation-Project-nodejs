@@ -5,7 +5,7 @@ const orderController = require("../controller/order");
 
 router.post("/create", orderController.createOrder);
 router.get("/:orderId",orderController.getOrderById);
-router.get("/user/:userId",  orderController.getOrdersByUser);
+router.get("/user/:firebaseId",  orderController.getOrdersByUser);
 router.put("/cancel/:orderId", orderController.cancelOrder);
 router.get("/:id/invoice", orderController.getOrderInvoice);
 router.get("/:id/track", orderController.trackOrder);

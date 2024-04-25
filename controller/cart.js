@@ -12,12 +12,12 @@ exports.addItemToCart = asyncHandler(async (req, res) => {
   }
 
   let cart = await prisma.cart.findFirst({
-    where: { userId: req.currentUser.userId },
+    where: { firebaseId: req.currentUser.firebaseId },
   });
 
   if (!cart) {
     cart = await prisma.cart.create({
-      data: { userId: req.currentUser.userId },
+      data: { firebaseId: req.currentUser.firebaseId },
     });
   }
 
@@ -59,11 +59,11 @@ exports.updateItemQuantity = asyncHandler(async (req, res) => {
 });
 
 exports.viewCart = asyncHandler(async (req, res, next) => {
-  const userId = req.params.userId;
+  const firebaseId = req.params.firebaseId;
 
   const cart = await prisma.cart.findFirst({
     where: {
-      userId: parseInt(userId),
+      firebaseId: parseInt(firebaseId),
     },
     include: {
       user: true,
@@ -83,15 +83,15 @@ exports.viewCart = asyncHandler(async (req, res, next) => {
 });
 
 exports.clearCart = asyncHandler(async (req, res, next) => {
-  const userId = req.params.userId;
+  const firebaseId = req.params.firebaseId;
 
   await prisma.cartItem.deleteMany({
-    where: { cartId: parseInt(userId) },
+    where: { cartId: parseInt(firebaseId) },
   });
 
   await prisma.cart.delete({
     where: {
-      userId: parseInt(userId),
+      firebaseId: parseInt(firebaseId),
       cartId,
       orderId
     },
@@ -102,11 +102,11 @@ exports.clearCart = asyncHandler(async (req, res, next) => {
 
 
 exports.calculateTotalCost = asyncHandler(async (req, res, next) => {
-  const userId = req.params.userId;
+  const firebaseId = req.params.firebaseId;
 
   const cart = await prisma.cart.findFirst({
     where: {
-      userId: parseInt(userId),
+      firebaseId: parseInt(firebaseId),
     },
     include: {
       cartItems: {
@@ -130,11 +130,11 @@ exports.calculateTotalCost = asyncHandler(async (req, res, next) => {
 });
 
 exports.saveCart = asyncHandler(async (req, res, next) => {
-  const userId = req.params.userId;
+  const firebaseId = req.params.firebaseId;
 
   const cart = await prisma.cart.findFirst({
     where: {
-      userId: parseInt(userId),
+      firebaseId: parseInt(firebaseId),
     },
     include: {
       cartItems: true,
@@ -149,7 +149,7 @@ exports.saveCart = asyncHandler(async (req, res, next) => {
     data: cart.cartItems.map((cartItem) => ({
       productId: cartItem.productId,
       quantity: cartItem.quantity,
-      userId: parseInt(userId),
+      firebaseId: parseInt(firebaseId),
     })),
   });
 

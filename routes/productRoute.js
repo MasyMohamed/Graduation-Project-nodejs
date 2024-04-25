@@ -30,7 +30,7 @@ router
   );
 
 router.route('/fav').post(addProductToFavorites)
-router.route("/fav/:userId").get(getAllFavoriteProducts);
+router.route("/fav/:firebaseId").get(getAllFavoriteProducts);
 router.route("/fav/remove").post(removeProductFromFavorites);
 
 

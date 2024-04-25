@@ -3,7 +3,7 @@ CREATE TYPE "UserRole" AS ENUM ('ADMIN', 'USER', 'PRODUCT_MANAGER', 'DELIVERYPAR
 
 -- CreateTable
 CREATE TABLE "User" (
-    "userId" SERIAL NOT NULL,
+    "firebaseId" SERIAL NOT NULL,
     "first_name" TEXT NOT NULL,
     "last_name" TEXT NOT NULL,
     "email" VARCHAR(255) NOT NULL,
@@ -12,7 +12,7 @@ CREATE TABLE "User" (
     "role" "UserRole" NOT NULL DEFAULT 'USER',
     "avatar" TEXT DEFAULT '/uploads/avatar2.png',
 
-    CONSTRAINT "User_pkey" PRIMARY KEY ("userId")
+    CONSTRAINT "User_pkey" PRIMARY KEY ("firebaseId")
 );
 
 -- CreateTable
@@ -43,7 +43,7 @@ CREATE TABLE "Category" (
 CREATE TABLE "Cart" (
     "cartId" SERIAL NOT NULL,
     "totalPrice" DOUBLE PRECISION NOT NULL,
-    "userId" INTEGER NOT NULL,
+    "firebaseId" INTEGER NOT NULL,
     "orderId" INTEGER,
 
     CONSTRAINT "Cart_pkey" PRIMARY KEY ("cartId")
@@ -63,7 +63,7 @@ CREATE TABLE "CartItem" (
 CREATE TABLE "SkinProfile" (
     "profileId" SERIAL NOT NULL,
     "skinType" TEXT NOT NULL,
-    "user_id" INTEGER,
+    "firebaseId" INTEGER,
     "first_name" VARCHAR(255),
     "last_name" VARCHAR(255),
 
@@ -97,7 +97,7 @@ CREATE TABLE "Address" (
     "addressId" SERIAL NOT NULL,
     "street" TEXT NOT NULL,
     "city" TEXT NOT NULL,
-    "user_id" INTEGER,
+    "firebaseId" INTEGER,
 
     CONSTRAINT "Address_pkey" PRIMARY KEY ("addressId")
 );
@@ -108,7 +108,7 @@ CREATE TABLE "Order" (
     "date" TIMESTAMP(3) NOT NULL,
     "totalAmount" DOUBLE PRECISION NOT NULL,
     "status" TEXT NOT NULL,
-    "userId" INTEGER NOT NULL,
+    "firebaseId" INTEGER NOT NULL,
     "paymentId" INTEGER NOT NULL,
     "addressId" INTEGER NOT NULL,
 
@@ -166,7 +166,7 @@ CREATE TABLE "Admin" (
 -- CreateTable
 CREATE TABLE "UserFavorite" (
     "id" SERIAL NOT NULL,
-    "userId" INTEGER NOT NULL,
+    "firebaseId" INTEGER NOT NULL,
     "productId" INTEGER NOT NULL,
 
     CONSTRAINT "UserFavorite_pkey" PRIMARY KEY ("id")
@@ -177,7 +177,7 @@ CREATE TABLE "SavedCartItem" (
     "id" SERIAL NOT NULL,
     "productId" INTEGER NOT NULL,
     "quantity" INTEGER NOT NULL,
-    "userId" INTEGER NOT NULL,
+    "firebaseId" INTEGER NOT NULL,
 
     CONSTRAINT "SavedCartItem_pkey" PRIMARY KEY ("id")
 );
@@ -258,7 +258,7 @@ CREATE INDEX "_AdminToUser_B_index" ON "_AdminToUser"("B");
 ALTER TABLE "Product" ADD CONSTRAINT "Product_categoryId_fkey" FOREIGN KEY ("categoryId") REFERENCES "Category"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Cart" ADD CONSTRAINT "Cart_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("userId") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "Cart" ADD CONSTRAINT "Cart_firebaseId_fkey" FOREIGN KEY ("firebaseId") REFERENCES "User"("firebaseId") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Cart" ADD CONSTRAINT "Cart_orderId_fkey" FOREIGN KEY ("orderId") REFERENCES "Order"("orderId") ON DELETE SET NULL ON UPDATE CASCADE;
@@ -270,7 +270,7 @@ ALTER TABLE "CartItem" ADD CONSTRAINT "CartItem_productId_fkey" FOREIGN KEY ("pr
 ALTER TABLE "CartItem" ADD CONSTRAINT "CartItem_cartId_fkey" FOREIGN KEY ("cartId") REFERENCES "Cart"("cartId") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "SkinProfile" ADD CONSTRAINT "SkinProfile_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "User"("userId") ON DELETE NO ACTION ON UPDATE NO ACTION;
+ALTER TABLE "SkinProfile" ADD CONSTRAINT "SkinProfile_firebaseId_fkey" FOREIGN KEY ("firebaseId") REFERENCES "User"("firebaseId") ON DELETE NO ACTION ON UPDATE NO ACTION;
 
 -- AddForeignKey
 ALTER TABLE "OrderItem" ADD CONSTRAINT "OrderItem_productId_fkey" FOREIGN KEY ("productId") REFERENCES "Product"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
@@ -282,10 +282,10 @@ ALTER TABLE "OrderItem" ADD CONSTRAINT "OrderItem_orderId_fkey" FOREIGN KEY ("or
 ALTER TABLE "Payment" ADD CONSTRAINT "Payment_orderId_fkey" FOREIGN KEY ("orderId") REFERENCES "Order"("orderId") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Address" ADD CONSTRAINT "Address_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "User"("userId") ON DELETE NO ACTION ON UPDATE NO ACTION;
+ALTER TABLE "Address" ADD CONSTRAINT "Address_firebaseId_fkey" FOREIGN KEY ("firebaseId") REFERENCES "User"("firebaseId") ON DELETE NO ACTION ON UPDATE NO ACTION;
 
 -- AddForeignKey
-ALTER TABLE "Order" ADD CONSTRAINT "Order_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("userId") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "Order" ADD CONSTRAINT "Order_firebaseId_fkey" FOREIGN KEY ("firebaseId") REFERENCES "User"("firebaseId") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Order" ADD CONSTRAINT "Order_addressId_fkey" FOREIGN KEY ("addressId") REFERENCES "Address"("addressId") ON DELETE RESTRICT ON UPDATE CASCADE;
@@ -297,7 +297,7 @@ ALTER TABLE "Shipping" ADD CONSTRAINT "Shipping_orderId_fkey" FOREIGN KEY ("orde
 ALTER TABLE "Shipping" ADD CONSTRAINT "Shipping_deliveryPartnerId_fkey" FOREIGN KEY ("deliveryPartnerId") REFERENCES "DeliveryPartner"("deliveryPartnerId") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "UserFavorite" ADD CONSTRAINT "UserFavorite_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("userId") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "UserFavorite" ADD CONSTRAINT "UserFavorite_firebaseId_fkey" FOREIGN KEY ("firebaseId") REFERENCES "User"("firebaseId") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "UserFavorite" ADD CONSTRAINT "UserFavorite_productId_fkey" FOREIGN KEY ("productId") REFERENCES "Product"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
@@ -312,7 +312,7 @@ ALTER TABLE "_RecommendedProducts" ADD CONSTRAINT "_RecommendedProducts_B_fkey" 
 ALTER TABLE "_DeliveryPartnerToUser" ADD CONSTRAINT "_DeliveryPartnerToUser_A_fkey" FOREIGN KEY ("A") REFERENCES "DeliveryPartner"("deliveryPartnerId") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "_DeliveryPartnerToUser" ADD CONSTRAINT "_DeliveryPartnerToUser_B_fkey" FOREIGN KEY ("B") REFERENCES "User"("userId") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "_DeliveryPartnerToUser" ADD CONSTRAINT "_DeliveryPartnerToUser_B_fkey" FOREIGN KEY ("B") REFERENCES "User"("firebaseId") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "_AdminToProductManager" ADD CONSTRAINT "_AdminToProductManager_A_fkey" FOREIGN KEY ("A") REFERENCES "Admin"("adminId") ON DELETE CASCADE ON UPDATE CASCADE;
@@ -330,4 +330,4 @@ ALTER TABLE "_AdminToDeliveryPartner" ADD CONSTRAINT "_AdminToDeliveryPartner_B_
 ALTER TABLE "_AdminToUser" ADD CONSTRAINT "_AdminToUser_A_fkey" FOREIGN KEY ("A") REFERENCES "Admin"("adminId") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "_AdminToUser" ADD CONSTRAINT "_AdminToUser_B_fkey" FOREIGN KEY ("B") REFERENCES "User"("userId") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "_AdminToUser" ADD CONSTRAINT "_AdminToUser_B_fkey" FOREIGN KEY ("B") REFERENCES "User"("firebaseId") ON DELETE CASCADE ON UPDATE CASCADE;

@@ -20,7 +20,7 @@ exports.getAllUsers = asyncHandler(async (req, res, next) => {
     skip,
     take: limit,
     select: {
-      userId: true,
+      firebaseId: true,
       first_name: true,
       last_name: true,
       email: true,
@@ -38,7 +38,7 @@ exports.register = asyncHandler(async (req, res, next) => {
     }
   });
 
-  const { first_name, last_name, email, password, role } = req.body;
+  const { first_name, last_name, email, password, role, address } = req.body;
 
   const oldUser = await prisma.user.findUnique({ where: { email: email } });
 
@@ -68,30 +68,43 @@ exports.register = asyncHandler(async (req, res, next) => {
       email,
       password: hashedPassword,
       role: role ? role.trim() : "USER",
-      avatar: req.file.filename,
+      address: address ? address : null, 
+      avatar: req.file ? req.file.filename : null,
     },
   });
 
-  const token = await generateJWT({
-    email: newUser.email,
-    id: newUser.id,
-    role: newUser.role,
-  });
-  newUser.token = token;
+  if (address) {
+    const [street, city] = address.split(', ');
 
-  return res.status(200).json({
-    status: "Success",
-    data: { user: { ...newUser, role: newUser.role } },
-  });
+    await prisma.address.create({
+      data: {
+        street: street,
+        city: city,
+        firebaseId: newUser.id,
+      },
+    });
+
+    const token = await generateJWT({
+      email: newUser.email,
+      id: newUser.id,
+      role: newUser.role,
+    });
+    newUser.token = token;
+
+    return res.status(200).json({
+      status: "Success",
+      data: { user: { ...newUser, role: newUser.role } },
+    });
+  }
 });
 
 exports.login = asyncHandler(async (req, res, next) => {
-  const { userId, email, password } = req.body;
+  const { firebaseId } = req.body;
 
-  if (!userId || !email || !password) {
+  if (!firebaseId) {
     return next(
       new Error(
-        "ID, email, and password are required!",
+        "User Not found",
         400,
         httpStatus.BadRequest
       )
@@ -99,21 +112,13 @@ exports.login = asyncHandler(async (req, res, next) => {
   }
 
   const user = await prisma.user.findUnique({
-    where: { userId: parseInt(userId), email: email },
+    where: { firebaseId: parseInt(firebaseId)},
   });
 
   if (!user) {
     return next(new Error("User not found", 404, httpStatus.NotFound));
-  }
-
-  const matchedPassword = await bcrypt.compare(password, user.password);
-
-  if (matchedPassword) {
-    return res.status(200).json({ status: "Success", data: { user } });
   } else {
-    return next(
-      new Error("Email or password is wrong", 400, httpStatus.BadRequest)
-    );
+    return res.status(200).json({ status: "Success", data: { user } });
   }
 });
 

@@ -5,11 +5,11 @@ const httpStatusText = require("../utils/httpStatusText");
 const AppError = require("../utils/AppError");
 
 exports.addProductToFavorites = asyncHandler(async (req, res, next) => {
-  const { userId, productId } = req.body; 
+  const { firebaseId, productId } = req.body; 
 
   const existingFavorite = await prisma.userFavorite.findFirst({
     where: {
-      userId,
+      firebaseId,
       productId,
     },
   });
@@ -23,7 +23,7 @@ exports.addProductToFavorites = asyncHandler(async (req, res, next) => {
   const favorite = await prisma.userFavorite.create({
     data: {
       user: {
-        connect: { userId: userId },
+        connect: { firebaseId: firebaseId },
       },
       product: {
         connect: { id: productId },
@@ -35,10 +35,10 @@ exports.addProductToFavorites = asyncHandler(async (req, res, next) => {
 });
 
 exports.getAllFavoriteProducts = asyncHandler(async (req, res, next) => {
-  const userId = + req.params.userId;
+  const firebaseId = + req.params.firebaseId;
 
   const favoriteProducts = await prisma.userFavorite.findMany({
-    where: { userId: userId },
+    where: { firebaseId: firebaseId },
     select: {
       product: true,
     },
@@ -52,12 +52,12 @@ exports.getAllFavoriteProducts = asyncHandler(async (req, res, next) => {
 });
 
 exports.removeProductFromFavorites = asyncHandler(async (req, res, next) => {
-  const { userId, productId } = req.body; 
+  const { firebaseId, productId } = req.body; 
 
   const existingFavorite = await prisma.userFavorite.findFirst({
     where: {
       user: {
-        userId: userId,
+        firebaseId: firebaseId,
       },
       productId: productId,
     },

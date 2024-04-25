@@ -5,7 +5,15 @@ const httpStatusText = require("../utils/httpStatusText");
 const AppError = require("../utils/AppError");
 
 exports.createOrder = asyncHandler(async (req, res, next) => {
-  const { userId, addressId, paymentId, cartId } = req.body;
+  const { firebaseId, addressId, paymentId, cartId } = req.body;
+
+    const userExists = await prisma.user.findUnique({
+      where: { firebaseId: firebaseId },
+    });
+
+    if (!userExists) {
+      return next(new AppError("User not found", 404));
+    }
 
   const cart = await prisma.cart.findFirst({
     where: { cartId: cartId },
@@ -21,25 +29,29 @@ exports.createOrder = asyncHandler(async (req, res, next) => {
     totalAmount += cartItem.product.price * cartItem.quantity;
   }
 
-  const order = await prisma.order.create({
-    data: {
-      date: new Date(),
-      totalAmount: totalAmount,
-      status: "Pending",
-      userId: userId,
-      orderItems: {
-        createMany: {
-          data: cart.cartItems.map((cartItem) => ({
-            productId: cartItem.productId,
-            quantity: cartItem.quantity,
-            subtotal: cartItem.product.price * cartItem.quantity,
-          })),
-        },
-      },
+   const order = await prisma.order.create({
+     data: {
+       date: new Date(),
+       totalAmount: totalAmount,
+       status: "Pending",
+       user: {
+         connect: { firebaseId: firebaseId },
+       },
+       orderItems: {
+         createMany: {
+           data: cart.cartItems.map((cartItem) => ({
+             productId: cartItem.productId,
+             quantity: cartItem.quantity,
+             subtotal: cartItem.product.price * cartItem.quantity,
+           })),
+         },
+       },
+       address: {
+         connect: { addressId: addressId },
+       },
       paymentId: paymentId,
-      addressId: addressId,
-    },
-  });
+     },
+   });
 
   await prisma.cartItem.deleteMany({ where: { cartId: cartId } });
 
@@ -68,10 +80,10 @@ exports.getOrderById = asyncHandler(async (req, res, next) => {
 });
 
 exports.getOrdersByUser = asyncHandler(async (req, res, next) => {
-  const { userId } = req.params;
+  const { firebaseId } = req.params;
 
   const user = await prisma.user.findUnique({
-    where: { userId: parseInt(userId) },
+    where: { firebaseId: parseInt(firebaseId) },
   });
 
   if (!user) {
@@ -79,7 +91,7 @@ exports.getOrdersByUser = asyncHandler(async (req, res, next) => {
   }
 
   const orders = await prisma.order.findMany({
-    where: { userId: parseInt(userId) },
+    where: { firebaseId: parseInt(firebaseId) },
     include: {
       user: true,
       orderItems: true,
@@ -199,7 +211,7 @@ exports.reOrder = asyncHandler(async (req, res, next) => {
   const newOrder = await prisma.order.create({
     data: {
       date: new Date(),
-      user: { connect: { userId: order.userId } },
+      user: { connect: { firebaseId: order.firebaseId } },
       totalAmount: order.totalAmount,
       status: "Pending",
       paymentId: order.paymentId,

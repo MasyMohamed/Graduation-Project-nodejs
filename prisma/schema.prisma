@@ -8,7 +8,7 @@ datasource db {
 }
 
 model User {
-  userId            Int              @id @default(autoincrement())
+  firebaseId        Int              @id @default(autoincrement())
   first_name        String
   last_name         String
   email             String           @unique @db.VarChar(255)
@@ -52,8 +52,8 @@ model Category {
 model Cart {
   cartId            Int              @id @default(autoincrement())
   totalPrice        Float
-  userId            Int
-  user              User             @relation(fields: [userId], references: [userId])
+  firebaseId        Int
+  user              User             @relation(fields: [firebaseId], references: [firebaseId])
   cartItems         CartItem[]
   order             Order?           @relation(fields: [orderId],references: [orderId])
   orderId           Int?             @unique
@@ -73,10 +73,10 @@ model CartItem {
 model SkinProfile {
   profileId         Int              @id @default(autoincrement())
   skinType          String
-  user_id           Int?
+  firebaseId        Int?
   first_name        String?          @db.VarChar(255)
   last_name         String?          @db.VarChar(255)
-  User              User?            @relation(fields: [user_id], references: [userId], onDelete: NoAction, onUpdate: NoAction)
+  User              User?            @relation(fields: [firebaseId], references: [firebaseId], onDelete: NoAction, onUpdate: NoAction)
   recommendations   Product[]        @relation("RecommendedProducts")
 }
 
@@ -107,8 +107,8 @@ model Address {
   addressId         Int              @id @default(autoincrement())
   street            String
   city              String
-  user_id           Int?
-  User              User?            @relation(fields: [user_id], references: [userId], onDelete: NoAction, onUpdate: NoAction)
+  firebaseId        Int?
+  User              User?            @relation(fields: [firebaseId], references: [firebaseId], onDelete: NoAction, onUpdate: NoAction)
   orders            Order[]
 }
 
@@ -117,8 +117,8 @@ model Order {
   date              DateTime
   totalAmount       Float
   status            String
-  userId            Int
-  user              User?            @relation(fields: [userId], references: [userId])
+  firebaseId        Int
+  user              User?            @relation(fields: [firebaseId], references: [firebaseId])
   orderItems        OrderItem[]
   paymentId         Int
   payment           Payment[]
@@ -191,9 +191,9 @@ enum UserRole {
 }
 model UserFavorite {
   id       Int     @id @default(autoincrement())
-  userId   Int
+  firebaseId   Int
   productId Int
-  user     User    @relation(fields: [userId], references: [userId])
+  user     User    @relation(fields: [firebaseId], references: [firebaseId])
   product  Product @relation(fields: [productId], references: [id])
 }
 
@@ -201,5 +201,5 @@ model SavedCartItem {
   id         Int      @id @default(autoincrement())
   productId  Int
   quantity   Int
-  userId     Int
+  firebaseId     Int
 }
