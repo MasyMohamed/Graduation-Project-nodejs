@@ -5,13 +5,12 @@ const httpStatusText = require("../utils/httpStatusText");
 const AppError = require("../utils/AppError");
 
 exports.addProductToFavorites = asyncHandler(async (req, res, next) => {
-  const { id, userId, productId } = req.body;
+  const { userId, productId } = req.body; 
 
-  const existingFavorite = await prisma.userFavorite.findUnique({
+  const existingFavorite = await prisma.userFavorite.findFirst({
     where: {
-      id,
-      userId, 
-      productId, 
+      userId,
+      productId,
     },
   });
 
@@ -53,12 +52,13 @@ exports.getAllFavoriteProducts = asyncHandler(async (req, res, next) => {
 });
 
 exports.removeProductFromFavorites = asyncHandler(async (req, res, next) => {
-  const {id, userId, productId } = req.body;
+  const { userId, productId } = req.body; 
 
-  const existingFavorite = await prisma.userFavorite.findUnique({
+  const existingFavorite = await prisma.userFavorite.findFirst({
     where: {
-      id,
-      userId: userId,
+      user: {
+        userId: userId,
+      },
       productId: productId,
     },
   });
@@ -71,7 +71,7 @@ exports.removeProductFromFavorites = asyncHandler(async (req, res, next) => {
 
   await prisma.userFavorite.delete({
     where: {
-      id: existingFavorite.id,
+      id: existingFavorite.id, 
     },
   });
 

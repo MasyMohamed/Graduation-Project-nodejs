@@ -86,15 +86,21 @@ exports.register = asyncHandler(async (req, res, next) => {
 });
 
 exports.login = asyncHandler(async (req, res, next) => {
-  const { email, password } = req.body;
+  const { userId, email, password } = req.body;
 
-  if (!email || !password) {
+  if (!userId || !email || !password) {
     return next(
-      new Error("Email and password are required!", 400, httpStatus.BadRequest)
+      new Error(
+        "ID, email, and password are required!",
+        400,
+        httpStatus.BadRequest
+      )
     );
   }
 
-  const user = await prisma.user.findUnique({ where: { email: email } });
+  const user = await prisma.user.findUnique({
+    where: { userId: parseInt(userId), email: email },
+  });
 
   if (!user) {
     return next(new Error("User not found", 404, httpStatus.NotFound));
@@ -103,15 +109,11 @@ exports.login = asyncHandler(async (req, res, next) => {
   const matchedPassword = await bcrypt.compare(password, user.password);
 
   if (matchedPassword) {
-    const token = await generateJWT({
-      email: user.email,
-      id: user._id,
-      role: user.role,
-    }); 
-    return res.status(200).json({ status: "Success", data: { token } });
+    return res.status(200).json({ status: "Success", data: { user } });
   } else {
     return next(
       new Error("Email or password is wrong", 400, httpStatus.BadRequest)
     );
   }
 });
+
