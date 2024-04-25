@@ -7,7 +7,6 @@ router.delete("/remove-item/:itemId", cartController.removeItemFromCart);
 router.put("/update-item/:itemId" ,cartController.updateItemQuantity);
 router.get("/:firebaseId", cartController.viewCart);
 router.delete("/clear/:firebaseId", cartController.clearCart);
-router.get("/total-cost/:firebaseId", cartController.calculateTotalCost);
 router.post("/save/:firebaseId", cartController.saveCart);
 
 module.exports = router;

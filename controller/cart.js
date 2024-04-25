@@ -100,35 +100,6 @@ exports.clearCart = asyncHandler(async (req, res, next) => {
   res.status(200).json({ message: "Cart cleared successfully" });
 });
 
-
-exports.calculateTotalCost = asyncHandler(async (req, res, next) => {
-  const firebaseId = req.params.firebaseId;
-
-  const cart = await prisma.cart.findFirst({
-    where: {
-      firebaseId: parseInt(firebaseId),
-    },
-    include: {
-      cartItems: {
-        include: {
-          product: true,
-        },
-      },
-    },
-  });
-
-  if (!cart) {
-    return next(new AppError("Cart not found", 404));
-  }
-
-  let totalCost = 0;
-  for (const cartItem of cart.cartItems) {
-    totalCost += cartItem.product.price * cartItem.quantity;
-  }
-
-  res.status(200).json({ totalCost });
-});
-
 exports.saveCart = asyncHandler(async (req, res, next) => {
   const firebaseId = req.params.firebaseId;
 
