@@ -8,6 +8,7 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const { token } = require("morgan");
 const { generateJWT } = require("../utils/generateJWT");
+const { data } = require("@tensorflow/tfjs");
 
 const prisma = new PrismaClient();
 
@@ -118,7 +119,10 @@ exports.login = asyncHandler(async (req, res, next) => {
   if (!user) {
     return next(new Error("User not found", 404, httpStatus.NotFound));
   } else {
-    return res.status(200).json({ status: "Success", data: { user } });
+    return res.status(200).json({
+      status: httpStatus.Success,
+      message: "This user logins successfully", 
+    });
   }
 });
 
