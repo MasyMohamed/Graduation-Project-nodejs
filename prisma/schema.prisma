@@ -9,10 +9,6 @@ datasource db {
 
 model User {
   firebaseId        String              @id @default(uuid())
-  first_name        String
-  last_name         String
-  email             String           @unique @db.VarChar(255)
-  password          String
   address           String?          @db.VarChar(255)
   addresses         Address[]
   DeliveryPartner   DeliveryPartner[]

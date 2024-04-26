@@ -2,7 +2,6 @@ const { PrismaClient } = require("@prisma/client");
 const AppError = require("../utils/AppError");
 const httpStatus = require("../utils/httpStatusText");
 const validatorMiddleware = require("../middleware/validatorMiddleware");
-const emailValidator = require("../utils/validators/emailValidator");
 const asyncHandler = require("express-async-handler");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
@@ -39,14 +38,14 @@ exports.register = asyncHandler(async (req, res, next) => {
     }
   });
 
-  const { first_name, last_name, email, password, role, address } = req.body;
+  const { firebaseId } = req.body;
 
-  const oldUser = await prisma.user.findUnique({ where: { email: email } });
+  const oldUser = await prisma.user.findUnique({ where: { firebaseId: firebaseId } });
 
   if (oldUser) {
     return res.status(400).json({
       httpCode: 400,
-      message: "User with this email already exists",
+      message: "User already exists",
       data: null,
       error: {
         statusCode: 400,
@@ -54,50 +53,19 @@ exports.register = asyncHandler(async (req, res, next) => {
     });
   }
 
-  const hashedPassword = await bcrypt.hash(password, 10);
-
-  if (!emailValidator.validateEmail(email)) {
-    return res
-      .status(400)
-      .json({ status: "Error", message: "Invalid email format" });
-  }
-
   const newUser = await prisma.user.create({
     data: {
-      first_name: first_name,
-      last_name: last_name,
-      email,
-      password: hashedPassword,
-      role: role ? role.trim() : "USER",
-      address: address ? address : null, 
-      avatar: req.file ? req.file.filename : null,
+      firebaseId:firebaseId
     },
   });
 
-  if (address) {
-    const [street, city] = address.split(', ');
-
-    await prisma.address.create({
-      data: {
-        street: street,
-        city: city,
-        firebaseId: newUser.id,
-      },
-    });
-
-    const token = await generateJWT({
-      email: newUser.email,
-      id: newUser.id,
-      role: newUser.role,
-    });
-    newUser.token = token;
 
     return res.status(200).json({
       status: "Success",
-      data: { user: { ...newUser, role: newUser.role } },
+      
+      data: { user: {newUser} },
     });
-  }
-});
+  });
 
 exports.login = asyncHandler(async (req, res, next) => {
   const { firebaseId } = req.body;

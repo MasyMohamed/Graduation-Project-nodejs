@@ -1,12 +1,12 @@
 const express = require("express");
 const router = express.Router();
 const {
-  getProducts,
   getAllProducts,
   getProduct,
   createProduct,
   updateProduct,
   deleteProduct,
+  searchProducts
 } = require("../controller/product");
 const { addProductToFavorites,
   getAllFavoriteProducts,
@@ -27,11 +27,24 @@ router
   .patch( validateProduct, updateProduct)
   .delete(
     deleteProduct
-  );
+);
+  
+/*router
+  .route("/search")
+  .get(searchProducts);
+*/
 
-router.route('/fav').post(addProductToFavorites)
-router.route("/fav/:firebaseId").get(getAllFavoriteProducts);
-router.route("/fav/remove").post(removeProductFromFavorites);
+router
+  .route('/fav')
+  .post(addProductToFavorites)
+
+router
+  .route("/fav/:firebaseId")
+  .get(getAllFavoriteProducts);
+
+router
+  .route("/fav/remove")
+  .post(removeProductFromFavorites);
 
 
 module.exports = router;

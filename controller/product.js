@@ -115,3 +115,33 @@ exports.deleteProduct = asyncHandler(async (req, res, next) => {
     message: "Product deleted successfully",
   });
 });
+
+/*exports.searchProducts = asyncHandler(async (req, res, next) => {
+  const { searchQuery } = req.query;
+  const mysearchQuery = req.query.searchQuery;
+  console.log("Search query:", mysearchQuery);
+
+
+  if (!searchQuery) {
+    return next(
+      new AppError("Search query is required", httpStatus.BadRequest)
+    );
+  }
+
+  try {
+    const products = await prisma.product.findMany({
+      where: {
+        OR: [
+          { name: { contains: searchQuery, mode: "insensitive" } },
+          { description: { contains: searchQuery, mode: "insensitive" } },
+          { brand: { contains: searchQuery, mode: "insensitive" } },
+          { skin_type: { contains: searchQuery, mode: "insensitive" } },
+        ],
+      },
+    });
+    res.json({ status: "Success", data: products });
+  } catch (error) {
+    next(error);
+  }
+});*/
+
