@@ -112,7 +112,7 @@ exports.login = asyncHandler(async (req, res, next) => {
   }
 
   const user = await prisma.user.findUnique({
-    where: { firebaseId: parseInt(firebaseId)},
+    where: { firebaseId: firebaseId},
   });
 
   if (!user) {

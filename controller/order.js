@@ -83,7 +83,7 @@ exports.getOrdersByUser = asyncHandler(async (req, res, next) => {
   const { firebaseId } = req.params;
 
   const user = await prisma.user.findUnique({
-    where: { firebaseId: parseInt(firebaseId) },
+    where: { firebaseId: (firebaseId) },
   });
 
   if (!user) {
@@ -91,7 +91,7 @@ exports.getOrdersByUser = asyncHandler(async (req, res, next) => {
   }
 
   const orders = await prisma.order.findMany({
-    where: { firebaseId: parseInt(firebaseId) },
+    where: { firebaseId: (firebaseId) },
     include: {
       user: true,
       orderItems: true,

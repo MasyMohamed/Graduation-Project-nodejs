@@ -75,7 +75,7 @@ exports.viewCart = asyncHandler(async (req, res, next) => {
 
   const cart = await prisma.cart.findFirst({
     where: {
-      firebaseId: parseInt(firebaseId),
+      firebaseId: (firebaseId),
     },
     include: {
       user: true,
@@ -98,12 +98,12 @@ exports.clearCart = asyncHandler(async (req, res, next) => {
   const firebaseId = req.params.firebaseId;
 
   await prisma.cartItem.deleteMany({
-    where: { cartId: parseInt(firebaseId) },
+    where: { cartId: (firebaseId) },
   });
 
   await prisma.cart.delete({
     where: {
-      firebaseId: parseInt(firebaseId),
+      firebaseId: (firebaseId),
       cartId,
       orderId
     },
@@ -117,7 +117,7 @@ exports.saveCart = asyncHandler(async (req, res, next) => {
 
   const cart = await prisma.cart.findFirst({
     where: {
-      firebaseId: parseInt(firebaseId),
+      firebaseId: (firebaseId),
     },
     include: {
       cartItems: true,
@@ -132,7 +132,7 @@ exports.saveCart = asyncHandler(async (req, res, next) => {
     data: cart.cartItems.map((cartItem) => ({
       productId: cartItem.productId,
       quantity: cartItem.quantity,
-      firebaseId: parseInt(firebaseId),
+      firebaseId: (firebaseId),
     })),
   });
 
