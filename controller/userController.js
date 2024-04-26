@@ -12,23 +12,13 @@ const { data } = require("@tensorflow/tfjs");
 const prisma = new PrismaClient();
 
 exports.getAllUsers = asyncHandler(async (req, res, next) => {
-  const page = +req.query.page || 1;
-  const limit = +req.query.limit || 20;
-  const skip = (page - 1) * limit;
-
   const users = await prisma.user.findMany({
-    skip,
-    take: limit,
     select: {
       firebaseId: true,
-      first_name: true,
-      last_name: true,
-      email: true,
-      role: true,
     },
   });
 
-  res.status(200).json({ status: httpStatus.Success, page, data: users });
+  res.status(200).json({ status: httpStatus.Success, data: users });
 });
 
 exports.register = asyncHandler(async (req, res, next) => {
@@ -62,8 +52,10 @@ exports.register = asyncHandler(async (req, res, next) => {
 
     return res.status(200).json({
       status: "Success",
-      
-      data: { user: {newUser} },
+
+      data: {
+        firebaseId: firebaseId,
+      },
     });
   });
 
