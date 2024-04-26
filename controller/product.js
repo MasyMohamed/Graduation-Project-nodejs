@@ -133,7 +133,10 @@ exports.searchProducts = asyncHandler(async (req, res, next) => {
         ],
       },
     });
-    res.json({ status: "Success", data: products });
+
+    const productNames = products.map((product) => product.name);
+
+    res.json({ status: "Success", data: {productNames} });
   } catch (error) {
     next(error);
   }
