@@ -5,7 +5,7 @@ const httpStatusText = require("../utils/httpStatusText");
 const AppError = require("../utils/AppError");
 
 exports.addProductToFavorites = asyncHandler(async (req, res, next) => {
-  const { firebaseId, productId } = req.body; 
+  const { firebaseId, productId } = req.body;
 
   const existingFavorite = await prisma.userFavorite.findFirst({
     where: {
@@ -35,7 +35,7 @@ exports.addProductToFavorites = asyncHandler(async (req, res, next) => {
 });
 
 exports.getAllFavoriteProducts = asyncHandler(async (req, res, next) => {
-  const firebaseId = + req.params.firebaseId;
+  const firebaseId = req.params.firebaseId;
 
   const favoriteProducts = await prisma.userFavorite.findMany({
     where: { firebaseId: firebaseId },
@@ -44,15 +44,15 @@ exports.getAllFavoriteProducts = asyncHandler(async (req, res, next) => {
     },
   });
 
-  if (!favoriteProducts) {
-    return next(new AppError("User not found", 404));
+  if (!favoriteProducts || favoriteProducts.length === 0) {
+    return next(new AppError("User has no favorite products", 404));
   }
 
   res.status(200).json({ favoriteProducts });
 });
 
 exports.removeProductFromFavorites = asyncHandler(async (req, res, next) => {
-  const { firebaseId, productId } = req.body; 
+  const { firebaseId, productId } = req.body;
 
   const existingFavorite = await prisma.userFavorite.findFirst({
     where: {
@@ -65,18 +65,15 @@ exports.removeProductFromFavorites = asyncHandler(async (req, res, next) => {
 
   if (!existingFavorite) {
     return next(
-      new AppError("Product not found in favorites", httpStatusText.NotFound)
+      new AppError("Product not found in favorites", 404)
     );
   }
 
   await prisma.userFavorite.delete({
     where: {
-      id: existingFavorite.id, 
+      id: existingFavorite.id,
     },
   });
 
   res.status(200).json({ message: "Product removed from favorites" });
 });
-
-
-

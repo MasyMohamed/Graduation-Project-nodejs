@@ -115,3 +115,26 @@ exports.deleteProduct = asyncHandler(async (req, res, next) => {
     message: "Product deleted successfully",
   });
 });
+
+exports.searchProducts = asyncHandler(async (req, res, next) => {
+  const { searchQuery } = req.params;
+
+  if (!searchQuery) {
+    return next(
+      new AppError("Search query is required", httpStatus.BadRequest)
+    );
+  }
+
+  try {
+    const products = await prisma.product.findMany({
+      where: {
+        OR: [
+          { name: { contains: searchQuery, mode: "insensitive" } },
+        ],
+      },
+    });
+    res.json({ status: "Success", data: products });
+  } catch (error) {
+    next(error);
+  }
+});

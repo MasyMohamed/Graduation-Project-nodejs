@@ -6,45 +6,30 @@ const {
   createProduct,
   updateProduct,
   deleteProduct,
-  searchProducts
+  searchProducts,
 } = require("../controller/product");
-const { addProductToFavorites,
+const {
+  addProductToFavorites,
   getAllFavoriteProducts,
-  removeProductFromFavorites
+  removeProductFromFavorites,
 } = require("../controller/addToFav");
 const { validateProduct } = require("../utils/validators/productValidator");
 
-router
-  .route("/")
-  .get(getAllProducts)
-  .post(
-    createProduct
-)
+router.route("/").get(getAllProducts).post(createProduct);
 
 router
   .route("/:id")
-  .get(validateProduct,getProduct)
-  .patch( validateProduct, updateProduct)
-  .delete(
-    deleteProduct
-);
-  
-/*router
-  .route("/search")
-  .get(searchProducts);
-*/
+  .get(validateProduct, getProduct)
+  .patch(validateProduct, updateProduct)
+  .delete(deleteProduct);
 
-router
-  .route('/fav')
-  .post(addProductToFavorites)
+router.route("/search/:searchQuery").get(searchProducts);
 
-router
-  .route("/fav/:firebaseId")
-  .get(getAllFavoriteProducts);
 
-router
-  .route("/fav/remove")
-  .post(removeProductFromFavorites);
+router.route("/fav/add").post(addProductToFavorites);
 
+router.route("/fav/user/:firebaseId").get(getAllFavoriteProducts);
+
+router.route("/fav/remove").post(removeProductFromFavorites);
 
 module.exports = router;
