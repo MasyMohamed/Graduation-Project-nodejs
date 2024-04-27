@@ -35,43 +35,34 @@ exports.createProduct = asyncHandler(async (req, res, next) => {
     stock_quantity,
   } = req.body;
 
-  try {
-    // Validate presence of categoryId
-    if (!categoryId) {
-      return res
-        .status(400)
-        .json({ status: "Error", message: "Missing category ID" });
-    }
-
-    const existingCategory = await prisma.category.findUnique({
-      where: { id: categoryId }, // Assuming "id" is the primary key for Category
-    });
-
-    if (!existingCategory) {
-      return res
-        .status(400)
-        .json({ status: "Error", message: "Invalid category ID" });
-    }
-
-    const productData = {
-      name,
-      price,
-      brand,
-      category: { connect: { id: categoryId } },
-      product_image_url,
-      description,
-      skin_type,
-      stock_quantity,
-    };
-
-    const product = await prisma.product.create({
-      data: productData,
-    });
-
-    res.status(201).json({ status: "Success", data: product });
-  } catch (error) {
-    next(error);
+  if (!categoryId) {
+    return next(new AppError("Missing category ID", 400));
   }
+
+  const existingCategory = await prisma.category.findUnique({
+    where: { id: categoryId },
+  });
+
+  if (!existingCategory) {
+    return next(new AppError("Invalid category ID", 400));
+  }
+
+  const productData = {
+    name,
+    price,
+    brand,
+    category: { connect: { id: categoryId } },
+    product_image_url,
+    description,
+    skin_type,
+    stock_quantity,
+  };
+
+  const product = await prisma.product.create({
+    data: productData,
+  });
+
+  res.status(201).json({ status: "Success", data: product });
 });
 
 exports.updateProduct = asyncHandler(async (req, res, next) => {
@@ -120,24 +111,17 @@ exports.searchProducts = asyncHandler(async (req, res, next) => {
   const { searchQuery } = req.params;
 
   if (!searchQuery) {
-    return next(
-      new AppError("Search query is required", httpStatus.BadRequest)
-    );
+    return next(new AppError("Search query is required", 400));
   }
 
-  try {
-    const products = await prisma.product.findMany({
-      where: {
-        OR: [
-          { name: { contains: searchQuery, mode: "insensitive" } },
-        ],
-      },
-    });
+  const products = await prisma.product.findMany({
+    where: {
+      OR: [{ name: { contains: searchQuery, mode: "insensitive" } }],
+    },
+  });
 
-    const productNames = products.map((product) => product.name);
+  const productNames = products.map((product) => product.name);
 
-    res.json({ status: "Success", data: {productNames} });
-  } catch (error) {
-    next(error);
-  }
+  res.json({ status: httpStatus.Success, data: { productNames } });
 });
+

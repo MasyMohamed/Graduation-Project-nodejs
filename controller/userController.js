@@ -3,11 +3,6 @@ const AppError = require("../utils/AppError");
 const httpStatus = require("../utils/httpStatusText");
 const validatorMiddleware = require("../middleware/validatorMiddleware");
 const asyncHandler = require("express-async-handler");
-const bcrypt = require("bcryptjs");
-const jwt = require("jsonwebtoken");
-const { token } = require("morgan");
-const { generateJWT } = require("../utils/generateJWT");
-const { data } = require("@tensorflow/tfjs");
 
 const prisma = new PrismaClient();
 
@@ -30,59 +25,47 @@ exports.register = asyncHandler(async (req, res, next) => {
 
   const { firebaseId } = req.body;
 
-  const oldUser = await prisma.user.findUnique({ where: { firebaseId: firebaseId } });
+  const oldUser = await prisma.user.findUnique({
+    where: { firebaseId: firebaseId },
+  });
 
   if (oldUser) {
-    return res.status(400).json({
-      httpCode: 400,
-      message: "User already exists",
-      data: null,
-      error: {
-        statusCode: 400,
-      },
-    });
+    return next(new AppError("User already exists", 400));
   }
 
   const newUser = await prisma.user.create({
     data: {
-      firebaseId:firebaseId
+      firebaseId: firebaseId,
     },
   });
 
-
-    return res.status(200).json({
-      status: "Success",
-
-      data: {
-        firebaseId: firebaseId,
-      },
-    });
+  return res.status(200).json({
+    status: "Success",
+    data: {
+      firebaseId: firebaseId,
+    },
   });
+});
 
 exports.login = asyncHandler(async (req, res, next) => {
   const { firebaseId } = req.body;
 
   if (!firebaseId) {
-    return next(
-      new Error(
-        "User Not found",
-        400,
-        httpStatus.BadRequest
-      )
-    );
+    return next(new AppError("User not found", 404));
   }
 
   const user = await prisma.user.findUnique({
-    where: { firebaseId: firebaseId},
+    where: { firebaseId: firebaseId },
   });
 
   if (!user) {
-    return next(new Error("User not found", 404, httpStatus.NotFound));
-  } else {
-    return res.status(200).json({
-      status: httpStatus.Success,
-      message: "This user logins successfully", 
-    });
+    return next(new AppError("User not found", 404));
   }
+
+  return res.status(200).json({
+    status: httpStatus.Success,
+    message: "This user logins successfully",
+  });
 });
+
 

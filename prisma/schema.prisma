@@ -47,7 +47,7 @@ model Category {
 
 model Cart {
   cartId            Int              @id @default(autoincrement())
-  totalPrice        Float
+  totalPrice        Float?
   firebaseId        String
   user              User             @relation(fields: [firebaseId], references: [firebaseId])
   cartItems         CartItem[]
@@ -194,8 +194,8 @@ model UserFavorite {
 }
 
 model SavedCartItem {
-  id         Int      @id @default(autoincrement())
-  productId  Int
-  quantity   Int
-  firebaseId     Int
+  id             Int      @id @default(autoincrement())
+  productId      Int
+  quantity       Int
+  firebaseId     String
 }

@@ -15,9 +15,7 @@ exports.addProductToFavorites = asyncHandler(async (req, res, next) => {
   });
 
   if (existingFavorite) {
-    return next(
-      new AppError("Product already in favorites", httpStatusText.BadRequest)
-    );
+    return next(new AppError("Product already in favorites", 400));
   }
 
   const favorite = await prisma.userFavorite.create({
@@ -31,7 +29,11 @@ exports.addProductToFavorites = asyncHandler(async (req, res, next) => {
     },
   });
 
-  res.status(201).json({ message: "Product added to favorites", favorite });
+  res.status(201).json({
+    status: "Success",
+    message: "Product added to favorites",
+    favorite,
+  });
 });
 
 exports.getAllFavoriteProducts = asyncHandler(async (req, res, next) => {
@@ -48,7 +50,10 @@ exports.getAllFavoriteProducts = asyncHandler(async (req, res, next) => {
     return next(new AppError("User has no favorite products", 404));
   }
 
-  res.status(200).json({ favoriteProducts });
+  res.status(200).json({
+    status: httpStatusText.Success,
+    favoriteProducts
+  });
 });
 
 exports.removeProductFromFavorites = asyncHandler(async (req, res, next) => {
@@ -75,5 +80,8 @@ exports.removeProductFromFavorites = asyncHandler(async (req, res, next) => {
     },
   });
 
-  res.status(200).json({ message: "Product removed from favorites" });
+  res.status(200).json({
+    status: httpStatusText.Success,
+    message: "Product removed from favorites"
+  });
 });

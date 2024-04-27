@@ -119,8 +119,6 @@ const getProductsByCategory = asyncHandler(async (req, res, next) => {
   res.status(200).json({ products });
 });
 
-
-
 module.exports = {
   getAllCategories,
   getCategoryById,

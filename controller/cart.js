@@ -4,12 +4,12 @@ const asyncHandler = require("express-async-handler");
 const httpStatusText = require("../utils/httpStatusText");
 const AppError = require("../utils/AppError");
 
-exports.addItemToCart = asyncHandler(async (req, res) => {
+exports.addItemToCart = asyncHandler(async (req, res, next) => {
   const { firebaseId, productId } = req.body;
-  const defaultQuantity = 1; 
+  const defaultQuantity = 1;
 
   if (!firebaseId) {
-    return res.status(401).json({ error: "User not authenticated" });
+    return next(new AppError("User doesn't exist", 401));
   }
 
   let cart = await prisma.cart.findFirst({
@@ -22,52 +22,113 @@ exports.addItemToCart = asyncHandler(async (req, res) => {
     });
   }
 
-  const product = await prisma.product.findUnique({
-    where: { id: productId },
+  let existingCartItem = await prisma.cartItem.findFirst({
+    where: { productId: productId, cartId: cart.cartId },
   });
 
-  if (!product) {
-    return res.status(404).json({ error: "Product not found" });
+  if (existingCartItem) {
+    const updatedCartItem = await prisma.cartItem.update({
+      where: { itemId: existingCartItem.itemId },
+      data: { quantity: existingCartItem.quantity + 1 },
+    });
+
+    const product = await prisma.product.findUnique({
+      where: { id: productId },
+    });
+
+    const totalPrice = product.price * updatedCartItem.quantity;
+
+    return res.status(200).json({
+      status: httpStatusText.Success,
+      message: "Quantity updated successfully",
+      itemId: updatedCartItem.itemId,
+      totalPrice: totalPrice,
+    });
+  } else {
+    const product = await prisma.product.findUnique({
+      where: { id: productId },
+    });
+
+    if (!product) {
+      return next(new AppError("Product not found", 404));
+    }
+
+    const cartItem = await prisma.cartItem.create({
+      data: {
+        quantity: defaultQuantity,
+        productId: productId,
+        cartId: cart.cartId,
+      },
+    });
+
+    const totalPrice = product.price * defaultQuantity;
+
+    return res.status(200).json({
+      status: httpStatusText.Success,
+      message: "Product added to cart successfully",
+      cartItem,
+      totalPrice: totalPrice,
+    });
   }
-
-  const cartItem = await prisma.cartItem.create({
-    data: {
-      quantity: defaultQuantity,
-      productId: productId,
-      cartId: cart.cartId,
-    },
-  });
-
-  res.json(cartItem);
 });
 
-exports.removeItemFromCart = asyncHandler(async (req, res) => {
+exports.removeItemFromCart = asyncHandler(async (req, res, next) => {
   const { itemId } = req.params;
+  const { firebaseId } = req.body;
 
   const cartItem = await prisma.cartItem.findUnique({
     where: { itemId: parseInt(itemId) },
-    include: { cart: true }, 
+    include: { cart: true },
   });
 
   if (!cartItem) {
-    return res.status(404).json({ error: "Item not found in cart" });
+    return next(new AppError("Item not found in cart", 404));
+  }
+
+  if (cartItem.cart.firebaseId !== firebaseId) {
+    return next(new AppError("Unauthorized to delete item from cart", 403));
   }
 
   await prisma.cartItem.delete({
     where: { itemId: parseInt(itemId) },
   });
 
-  res.json({ message: "Item removed from cart successfully" });
+  res.status(200).json({
+    status: httpStatusText.Success,
+    message: "Item removed from cart successfully",
+  });
 });
 
-exports.updateItemQuantity = asyncHandler(async (req, res) => {
+exports.updateItemQuantity = asyncHandler(async (req, res, next) => {
   const { itemId } = req.params;
-  const { quantity } = req.body;
+  const { quantity, firebaseId } = req.body; 
+
+  const existingItem = await prisma.cartItem.findUnique({
+    where: { itemId: parseInt(itemId) },
+  });
+
+  if (!existingItem) {
+    return next(new AppError("Item not found", 404));
+  }
+
+  const cart = await prisma.cart.findFirst({
+    where: { firebaseId: firebaseId },
+    include: { cartItems: true },
+  });
+
+  const itemBelongsToUser = cart.cartItems.some(
+    (item) => item.itemId === parseInt(itemId)
+  );
+  if (!itemBelongsToUser) {
+    return next(new AppError("Unauthorized to update item quantity", 403));
+  }
+
   await prisma.cartItem.update({
     where: { itemId: parseInt(itemId) },
     data: { quantity: quantity },
   });
-  res.json({ message: "Item quantity updated successfully" });
+
+  res.status(200).json({ message: "Item quantity updated successfully" });
 });
 
 exports.viewCart = asyncHandler(async (req, res, next) => {
@@ -75,7 +136,7 @@ exports.viewCart = asyncHandler(async (req, res, next) => {
 
   const cart = await prisma.cart.findFirst({
     where: {
-      firebaseId: (firebaseId),
+      firebaseId: firebaseId,
     },
     include: {
       user: true,
@@ -91,22 +152,36 @@ exports.viewCart = asyncHandler(async (req, res, next) => {
     return next(new AppError("Cart not found", 404));
   }
 
-  res.status(200).json({ cart });
+   const cartItemsWithTotalPrice = cart.cartItems.map((cartItem) => ({
+     ...cartItem,
+     totalPrice: cartItem.product.price * cartItem.quantity,
+   }));
+  
+  res.status(200).json({
+    status: httpStatusText.Success,
+    cart: cartItemsWithTotalPrice
+  });
 });
 
 exports.clearCart = asyncHandler(async (req, res, next) => {
   const firebaseId = req.params.firebaseId;
 
+  const cart = await prisma.cart.findFirst({
+    where: { firebaseId: firebaseId },
+  });
+
+  if (!cart) {
+    return next(new AppError("Cart not found", 404));
+  }
+
+  const cartId = cart.cartId;
+
   await prisma.cartItem.deleteMany({
-    where: { cartId: (firebaseId) },
+    where: { cartId: cartId },
   });
 
   await prisma.cart.delete({
-    where: {
-      firebaseId: (firebaseId),
-      cartId,
-      orderId
-    },
+    where: { cartId: cartId },
   });
 
   res.status(200).json({ message: "Cart cleared successfully" });
@@ -117,7 +192,7 @@ exports.saveCart = asyncHandler(async (req, res, next) => {
 
   const cart = await prisma.cart.findFirst({
     where: {
-      firebaseId: (firebaseId),
+      firebaseId: firebaseId,
     },
     include: {
       cartItems: true,
@@ -132,12 +207,9 @@ exports.saveCart = asyncHandler(async (req, res, next) => {
     data: cart.cartItems.map((cartItem) => ({
       productId: cartItem.productId,
       quantity: cartItem.quantity,
-      firebaseId: (firebaseId),
+      firebaseId: firebaseId,
     })),
   });
 
   res.status(201).json({ message: "Cart saved successfully", savedCartItems });
 });
-
-
-
