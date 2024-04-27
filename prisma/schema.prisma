@@ -18,7 +18,7 @@ model User {
   carts             Cart[]
   orders            Order[]
   admins            Admin[]  
-  userFavorite      UserFavorite[]
+  userFavorite      UserFavorite[]   
 }
 
 model Product {
@@ -36,6 +36,8 @@ model Product {
   cartItems         CartItem[]
   skinProfiles      SkinProfile[]  @relation("RecommendedProducts")
   userFavorite      UserFavorite[]
+  isFavourite       Boolean        @default(false)
+  isCart            Boolean        @default(false)
 }
 
 model Category {
