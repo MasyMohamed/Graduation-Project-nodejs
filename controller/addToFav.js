@@ -49,10 +49,12 @@ exports.getAllFavoriteProducts = asyncHandler(async (req, res, next) => {
   if (!favoriteProducts || favoriteProducts.length === 0) {
     return next(new AppError("User has no favorite products", 404));
   }
+    const products = favoriteProducts.map((item) => item.product);
+
 
   res.status(200).json({
     status: httpStatusText.Success,
-    favoriteProducts
+    favoriteProducts: products
   });
 });
 

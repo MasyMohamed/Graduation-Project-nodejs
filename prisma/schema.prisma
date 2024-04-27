@@ -35,7 +35,7 @@ model Product {
   orderItems        OrderItem[]
   cartItems         CartItem[]
   skinProfiles      SkinProfile[]  @relation("RecommendedProducts")
-  userFavorite       UserFavorite[]
+  userFavorite      UserFavorite[]
 }
 
 model Category {
