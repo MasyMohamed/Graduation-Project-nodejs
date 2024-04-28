@@ -9,7 +9,8 @@ datasource db {
 
 model User {
   firebaseId        String              @id @default(uuid())
-  address           String?          @db.VarChar(255)
+  address           String?             @db.VarChar(255)
+  phoneNumber       String?             @db.VarChar(20)
   addresses         Address[]
   DeliveryPartner   DeliveryPartner[]
   SkinProfile       SkinProfile[]
@@ -89,22 +90,9 @@ model OrderItem {
 
   @@map("OrderItem")
 }
-
-model Payment {
-  paymentId         Int              @id @default(autoincrement())
-  status            String
-  amount            Float
-  paymentDate       DateTime
-  orderId           Int
-  order             Order            @relation(fields: [orderId], references: [orderId])
-
-  @@map("Payment")
-}
-
 model Address {
   addressId         Int              @id @default(autoincrement())
-  street            String
-  city              String
+  address           String
   firebaseId        String?
   User              User?            @relation(fields: [firebaseId], references: [firebaseId], onDelete: NoAction, onUpdate: NoAction)
   orders            Order[]
@@ -115,28 +103,24 @@ model Order {
   date              DateTime
   totalAmount       Float
   status            String
-  firebaseId        String
-  user              User?            @relation(fields: [firebaseId], references: [firebaseId])
+  firebaseId        String          
+  user              User?           @relation(fields: [firebaseId], references: [firebaseId])
   orderItems        OrderItem[]
-  paymentId         Int
-  payment           Payment[]
-  addressId         Int
-  address           Address?         @relation(fields: [addressId], references: [addressId])
+  addressId         Int?
+  address           Address?        @relation(fields: [addressId], references: [addressId])
   shipping          Shipping[]
   cart              Cart[]
+  phoneNumber       String? 
 }
 
 model Shipping {
   shippingId        Int              @id @default(autoincrement())
   status            String
   shippingDate      DateTime
-  estimateDate      DateTime
-  actualDate        DateTime?
   orderId           Int
   order             Order            @relation(fields: [orderId], references: [orderId])
-  deliveryPartnerId Int
-  deliveryPartner   DeliveryPartner  @relation(fields: [deliveryPartnerId], references: [deliveryPartnerId])
-  
+  deliveryPartnerId Int?             
+  deliveryPartner   DeliveryPartner? @relation(fields: [deliveryPartnerId], references: [deliveryPartnerId])
 
   @@map("Shipping")
 }
@@ -148,7 +132,6 @@ model DeliveryPartner {
   shipping          Shipping[]
   admins            Admin[]          
   users             User[]  
-
 
   @@map("DeliveryPartner")
 }
