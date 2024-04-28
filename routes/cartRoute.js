@@ -8,5 +8,7 @@ router.put("/update-item/:itemId" ,cartController.updateItemQuantity);
 router.get("/:firebaseId", cartController.viewCart);
 router.delete("/clear/:firebaseId", cartController.clearCart);
 router.post("/save/:firebaseId", cartController.saveCart);
+router.put("/users/:firebaseId/products/:productId/toggleCart",cartController.toggleCartStatus);
+
 
 module.exports = router;

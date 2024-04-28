@@ -12,6 +12,7 @@ const {
   addProductToFavorites,
   getAllFavoriteProducts,
   removeProductFromFavorites,
+  toggleFavoriteStatus
 } = require("../controller/addToFav");
 const { validateProduct } = require("../utils/validators/productValidator");
 
@@ -23,13 +24,25 @@ router
   .patch(validateProduct, updateProduct)
   .delete(deleteProduct);
 
-router.route("/search/:searchQuery").get(searchProducts);
+router
+  .route("/search/:searchQuery")
+  .get(searchProducts);
 
 
-router.route("/fav/add").post(addProductToFavorites);
+router
+  .route("/fav/add")
+  .post(addProductToFavorites);
 
-router.route("/fav/user/:firebaseId").get(getAllFavoriteProducts);
+router
+  .route("/fav/user/:firebaseId")
+  .get(getAllFavoriteProducts);
 
-router.route("/fav/remove").post(removeProductFromFavorites);
+router
+  .route("/fav/remove")
+  .post(removeProductFromFavorites);
+
+router
+  .route("/:productId/users/:firebaseId/toggleFavorite")
+  .put(toggleFavoriteStatus);
 
 module.exports = router;

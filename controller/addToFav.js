@@ -98,3 +98,42 @@ exports.removeProductFromFavorites = asyncHandler(async (req, res, next) => {
     message: "Product removed from favorites"
   });
 });
+
+exports.toggleFavoriteStatus = asyncHandler(async (req, res, next) => {
+  const { firebaseId, productId } = req.params;
+
+  const user = await prisma.user.findUnique({
+    where: {
+      firebaseId: firebaseId,
+    },
+  });
+
+  if (!user) {
+    return next(new AppError("User not found", 404));
+  }
+
+  const product = await prisma.product.findUnique({
+    where: {
+      id: parseInt(productId),
+    },
+  });
+
+  if (!product) {
+    return next(new AppError("Product not found", 404));;
+  }
+
+  const updatedProduct = await prisma.product.update({
+    where: {
+      id: parseInt(productId),
+    },
+    data: {
+      isFavourite: !product.isFavourite,
+    },
+  });
+
+  res.status(200).json({
+    status: httpStatusText.Success,
+    isFavourite: updatedProduct.isFavourite
+  });
+});
+

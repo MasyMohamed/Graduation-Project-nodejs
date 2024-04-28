@@ -35,16 +35,6 @@ exports.addItemToCart = asyncHandler(async (req, res, next) => {
     const product = await prisma.product.findUnique({
       where: { id: productId },
     });
-
-    await prisma.product.update({
-      where: {
-        id: productId,
-      },
-      data: {
-        isCart: true,
-      },
-    });
-
     const totalPrice = product.price * updatedCartItem.quantity;
 
     return res.status(200).json({
@@ -222,3 +212,42 @@ exports.saveCart = asyncHandler(async (req, res, next) => {
 
   res.status(201).json({ message: "Cart saved successfully", savedCartItems });
 });
+
+exports.toggleCartStatus = asyncHandler(async (req, res, next) => {
+  const { firebaseId, productId } = req.params;
+
+  const user = await prisma.user.findUnique({
+    where: {
+      firebaseId: firebaseId,
+    },
+  });
+
+  if (!user) {
+    return next(new AppError("User not found", 404));
+  }
+
+  const product = await prisma.product.findUnique({
+    where: {
+      id: parseInt(productId),
+    },
+  });
+
+  if (!product) {
+    return next(new AppError("Product not found", 404));
+  }
+
+  const updatedProduct = await prisma.product.update({
+    where: {
+      id: parseInt(productId),
+    },
+    data: {
+      isCart: !product.isCart,
+    },
+  });
+
+  res.status(200).json({
+    status: httpStatusText.Success,
+    isCart: updatedProduct.isCart,
+  });
+});
+
