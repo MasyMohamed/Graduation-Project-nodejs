@@ -24,10 +24,21 @@ exports.addProductToFavorites = asyncHandler(async (req, res, next) => {
         connect: { firebaseId: firebaseId },
       },
       product: {
-        connect: { id: productId },
+        connect: {
+          id: productId,
+        },
       },
     },
   });
+
+await prisma.product.update({
+  where: {
+    id: productId,
+  },
+  data: {
+    isFavourite: true,
+  },
+});
 
   res.status(201).json({
     status: "Success",

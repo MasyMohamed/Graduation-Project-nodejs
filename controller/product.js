@@ -120,8 +120,6 @@ exports.searchProducts = asyncHandler(async (req, res, next) => {
     },
   });
 
-  const productNames = products.map((product) => product.name);
-
-  res.json({ status: httpStatus.Success, data: { productNames } });
+  res.json({ status: httpStatus.Success, data: { products } });
 });
 
