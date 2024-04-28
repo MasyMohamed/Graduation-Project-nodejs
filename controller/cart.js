@@ -36,6 +36,15 @@ exports.addItemToCart = asyncHandler(async (req, res, next) => {
       where: { id: productId },
     });
 
+    await prisma.product.update({
+      where: {
+        id: productId,
+      },
+      data: {
+        isCart: true,
+      },
+    });
+
     const totalPrice = product.price * updatedCartItem.quantity;
 
     return res.status(200).json({
