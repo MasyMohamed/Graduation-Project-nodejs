@@ -92,7 +92,7 @@ model OrderItem {
 }
 model Address {
   addressId         Int              @id @default(autoincrement())
-  address           String
+  address           String[]
   firebaseId        String?
   User              User?            @relation(fields: [firebaseId], references: [firebaseId], onDelete: NoAction, onUpdate: NoAction)
   orders            Order[]
@@ -110,7 +110,7 @@ model Order {
   address           Address?        @relation(fields: [addressId], references: [addressId])
   shipping          Shipping[]
   cart              Cart[]
-  phoneNumber       String? 
+  phoneNumber       String
 }
 
 model Shipping {

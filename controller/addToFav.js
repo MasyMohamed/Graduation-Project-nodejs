@@ -4,46 +4,86 @@ const asyncHandler = require("express-async-handler");
 const httpStatusText = require("../utils/httpStatusText");
 const AppError = require("../utils/AppError");
 
-exports.addProductToFavorites = asyncHandler(async (req, res, next) => {
+
+exports.toggleFavoriteStatus = asyncHandler(async (req, res, next) => {
   const { firebaseId, productId } = req.body;
 
-  const existingFavorite = await prisma.userFavorite.findFirst({
+  // Find the user by Firebase ID
+  const user = await prisma.user.findUnique({
     where: {
-      firebaseId,
-      productId,
+      firebaseId: firebaseId,
     },
   });
 
-  if (existingFavorite) {
-    return next(new AppError("Product already in favorites", 400));
+  if (!user) {
+    return res.status(404).json({
+      status: "Error",
+      message: "User not found",
+    });
   }
 
-  const favorite = await prisma.userFavorite.create({
-    data: {
-      user: {
-        connect: { firebaseId: firebaseId },
-      },
-      product: {
-        connect: {
-          id: productId,
-        },
-      },
+  // Find the product by ID
+  const product = await prisma.product.findUnique({
+    where: {
+      id: parseInt(productId),
     },
   });
 
-await prisma.product.update({
-  where: {
-    id: productId,
-  },
-  data: {
-    isFavourite: true,
-  },
-});
+  if (!product) {
+    return res.status(404).json({
+      status: "Error",
+      message: "Product not found",
+    });
+  }
 
-  res.status(201).json({
+  let updatedProduct;
+
+  // Toggle the isFavourite status
+  if (product.isFavourite) {
+    // Remove the product from favorites
+    await prisma.userFavorite.deleteMany({
+      where: {
+        productId: parseInt(productId),
+        firebaseId: firebaseId,
+      },
+    });
+    updatedProduct = await prisma.product.update({
+      where: {
+        id: parseInt(productId),
+      },
+      data: {
+        isFavourite: false,
+      },
+    });
+  } else {
+    // Add the product to favorites
+    await prisma.userFavorite.create({
+      data: {
+        user: {
+          connect: {
+            firebaseId: firebaseId,
+          },
+        },
+        product: {
+          connect: {
+            id: parseInt(productId),
+          },
+        },
+      },
+    });
+    updatedProduct = await prisma.product.update({
+      where: {
+        id: parseInt(productId),
+      },
+      data: {
+        isFavourite: true,
+      },
+    });
+  }
+
+  res.status(200).json({
     status: "Success",
-    message: "Product added to favorites",
-    favorite,
+    isFavourite: updatedProduct.isFavourite,
   });
 });
 
@@ -68,72 +108,3 @@ exports.getAllFavoriteProducts = asyncHandler(async (req, res, next) => {
     favoriteProducts: products
   });
 });
-
-exports.removeProductFromFavorites = asyncHandler(async (req, res, next) => {
-  const { firebaseId, productId } = req.body;
-
-  const existingFavorite = await prisma.userFavorite.findFirst({
-    where: {
-      user: {
-        firebaseId: firebaseId,
-      },
-      productId: productId,
-    },
-  });
-
-  if (!existingFavorite) {
-    return next(
-      new AppError("Product not found in favorites", 404)
-    );
-  }
-
-  await prisma.userFavorite.delete({
-    where: {
-      id: existingFavorite.id,
-    },
-  });
-
-  res.status(200).json({
-    status: httpStatusText.Success,
-    message: "Product removed from favorites"
-  });
-});
-
-exports.toggleFavoriteStatus = asyncHandler(async (req, res, next) => {
-  const { firebaseId, productId } = req.params;
-
-  const user = await prisma.user.findUnique({
-    where: {
-      firebaseId: firebaseId,
-    },
-  });
-
-  if (!user) {
-    return next(new AppError("User not found", 404));
-  }
-
-  const product = await prisma.product.findUnique({
-    where: {
-      id: parseInt(productId),
-    },
-  });
-
-  if (!product) {
-    return next(new AppError("Product not found", 404));;
-  }
-
-  const updatedProduct = await prisma.product.update({
-    where: {
-      id: parseInt(productId),
-    },
-    data: {
-      isFavourite: !product.isFavourite,
-    },
-  });
-
-  res.status(200).json({
-    status: httpStatusText.Success,
-    isFavourite: updatedProduct.isFavourite
-  });
-});
-

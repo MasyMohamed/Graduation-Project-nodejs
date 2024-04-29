@@ -46,7 +46,7 @@ exports.createOrder = asyncHandler(async (req, res, next) => {
           })),
         },
       },
-      address: { create: { address: address } }, 
+      address: { create: { address: address } },
       phoneNumber: phoneNumber,
     },
   });

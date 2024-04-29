@@ -29,20 +29,12 @@ router
   .get(searchProducts);
 
 
-router
-  .route("/fav/add")
-  .post(addProductToFavorites);
+router.put("/toggleFavorite", toggleFavoriteStatus);
+
 
 router
   .route("/fav/user/:firebaseId")
   .get(getAllFavoriteProducts);
 
-router
-  .route("/fav/remove")
-  .post(removeProductFromFavorites);
-
-router
-  .route("/:productId/users/:firebaseId/toggleFavorite")
-  .put(toggleFavoriteStatus);
 
 module.exports = router;
