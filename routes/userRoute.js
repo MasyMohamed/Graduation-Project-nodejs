@@ -37,4 +37,9 @@ router.post("/register",
   upload.single('avatar'),
   userController.register);
 
+router.post("/createPhoneNumber", userController.createPhoneNumber);
+router.post("/createAddress", userController.createAddress);
+
+
+
 module.exports = router;

@@ -68,4 +68,59 @@ exports.login = asyncHandler(async (req, res, next) => {
   });
 });
 
+exports.createAddress = asyncHandler(async (req, res, next) => {
+  const { firebaseId, address } = req.body;
+
+  const user = await prisma.user.findUnique({
+    where: { firebaseId: firebaseId },
+  });
+
+  if (!user) {
+    return res.status(404).json({
+      status: "Error",
+      message: "User not found",
+    });
+  }
+
+  const newAddress = await prisma.address.create({
+    data: {
+      address: address,
+      firebaseId: firebaseId, // Ensure the userId field is set to the user's firebaseId
+    },
+  });
+
+  res.status(201).json({
+    status: "Success",
+    message: "Address created successfully",
+    address: newAddress,
+  });
+});
+
+exports.createPhoneNumber = asyncHandler(async (req, res, next) => {
+  const { firebaseId, phoneNumber } = req.body;
+
+  const user = await prisma.user.findUnique({
+    where: { firebaseId: firebaseId },
+  });
+
+  if (!user) {
+    return res.status(404).json({
+      status: "Error",
+      message: "User not found",
+    });
+  }
+
+  const updatedUser = await prisma.user.update({
+    where: { firebaseId: firebaseId },
+    data: {
+      phoneNumber: phoneNumber,
+    },
+  });
+
+  res.status(200).json({
+    status: "Success",
+    message: "Phone number updated successfully",
+  });
+});
+
 
