@@ -37,8 +37,9 @@ router.post("/register",
   upload.single('avatar'),
   userController.register);
 
-router.put("/update", userController.updateUser);
+router.put("/address", userController.updateAddress);
 
+router.put("/phoneNumber", userController.updatePhoneNumber);
 
 router.get("/:firebaseId", userController.getUserById);
 

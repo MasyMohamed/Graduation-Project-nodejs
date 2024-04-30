@@ -68,8 +68,8 @@ exports.login = asyncHandler(async (req, res, next) => {
   });
 });
 
-exports.updateUser = asyncHandler(async (req, res, next) => {
-  const { firebaseId, address, phoneNumber } = req.body;
+exports.updateAddress = asyncHandler(async (req, res, next) => {
+  const { firebaseId, address } = req.body;
 
   const user = await prisma.user.findUnique({
     where: { firebaseId: firebaseId },
@@ -82,10 +82,6 @@ exports.updateUser = asyncHandler(async (req, res, next) => {
     });
   }
 
-  let updatedUser = user;
-  if (!updatedUser.addresses) {
-    updatedUser.addresses = [];
-  }
   if (address) {
     const existingAddress = await prisma.address.findFirst({
       where: {
@@ -104,11 +100,30 @@ exports.updateUser = asyncHandler(async (req, res, next) => {
     const newAddress = await prisma.address.create({
       data: {
         address: address,
-        firebaseId:firebaseId , 
+        firebaseId: firebaseId,
       },
     });
 
-    updatedUser.addresses.push(newAddress);
+    return res.status(200).json({
+      status: "Success",
+      message: "Address added successfully",
+      address: newAddress,
+    });
+  }
+});
+
+exports.updatePhoneNumber = asyncHandler(async (req, res, next) => {
+  const { firebaseId, phoneNumber } = req.body;
+
+  const user = await prisma.user.findUnique({
+    where: { firebaseId: firebaseId },
+  });
+
+  if (!user) {
+    return res.status(404).json({
+      status: "Error",
+      message: "User not found",
+    });
   }
 
   if (phoneNumber) {
@@ -120,19 +135,19 @@ exports.updateUser = asyncHandler(async (req, res, next) => {
       });
     }
 
-    updatedUser = await prisma.user.update({
+    const updatedUser = await prisma.user.update({
       where: { firebaseId: firebaseId },
       data: {
         phoneNumber: phoneNumber,
       },
     });
-  }
 
-  res.status(200).json({
-    status: "Success",
-    message: "User information updated successfully",
-    user: updatedUser,
-  });
+    return res.status(200).json({
+      status: "Success",
+      message: "Phone number updated successfully",
+      user: updatedUser,
+    });
+  }
 });
 
 exports.getUserById = asyncHandler(async (req, res, next) => {
