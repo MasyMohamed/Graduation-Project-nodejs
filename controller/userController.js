@@ -68,8 +68,8 @@ exports.login = asyncHandler(async (req, res, next) => {
   });
 });
 
-exports.createAddress = asyncHandler(async (req, res, next) => {
-  const { firebaseId, address } = req.body;
+exports.updateUser = asyncHandler(async (req, res, next) => {
+  const { firebaseId, address, phoneNumber } = req.body;
 
   const user = await prisma.user.findUnique({
     where: { firebaseId: firebaseId },
@@ -82,45 +82,92 @@ exports.createAddress = asyncHandler(async (req, res, next) => {
     });
   }
 
-  const newAddress = await prisma.address.create({
-    data: {
-      address: address,
-      firebaseId: firebaseId, // Ensure the userId field is set to the user's firebaseId
-    },
-  });
-
-  res.status(201).json({
-    status: "Success",
-    message: "Address created successfully",
-    address: newAddress,
-  });
-});
-
-exports.createPhoneNumber = asyncHandler(async (req, res, next) => {
-  const { firebaseId, phoneNumber } = req.body;
-
-  const user = await prisma.user.findUnique({
-    where: { firebaseId: firebaseId },
-  });
-
-  if (!user) {
-    return res.status(404).json({
-      status: "Error",
-      message: "User not found",
+  let updatedUser = user;
+  if (!updatedUser.addresses) {
+    updatedUser.addresses = [];
+  }
+  if (address) {
+    const existingAddress = await prisma.address.findFirst({
+      where: {
+        address: address,
+        firebaseId: user.firebaseId,
+      },
     });
+
+    if (existingAddress) {
+      return res.status(400).json({
+        status: "Error",
+        message: "Address already exists for the user",
+      });
+    }
+
+    const newAddress = await prisma.address.create({
+      data: {
+        address: address,
+        firebaseId:firebaseId , 
+      },
+    });
+
+    updatedUser.addresses.push(newAddress);
   }
 
-  const updatedUser = await prisma.user.update({
-    where: { firebaseId: firebaseId },
-    data: {
-      phoneNumber: phoneNumber,
-    },
-  });
+  if (phoneNumber) {
+    const existingPhone = user.phoneNumber;
+    if (existingPhone && existingPhone === phoneNumber) {
+      return res.status(400).json({
+        status: "Error",
+        message: "Phone number already exists for the user",
+      });
+    }
+
+    updatedUser = await prisma.user.update({
+      where: { firebaseId: firebaseId },
+      data: {
+        phoneNumber: phoneNumber,
+      },
+    });
+  }
 
   res.status(200).json({
     status: "Success",
-    message: "Phone number updated successfully",
+    message: "User information updated successfully",
+    user: updatedUser,
   });
 });
 
+exports.getUserById = asyncHandler(async (req, res, next) => {
+  const firebaseId = req.params.firebaseId;
+
+  const user = await prisma.user.findUnique({
+    where: {
+      firebaseId: firebaseId,
+    },
+    include: {
+      addresses: true, 
+    },
+  });
+
+  if (!user) {
+    return res.status(404).json({
+      status: "Error",
+      message: "User not found",
+    });
+  }
+
+  const phoneNumber = await prisma.user.findUnique({
+    where: {
+      firebaseId: firebaseId,
+    },
+    select: {
+      phoneNumber: true,
+    },
+  });
+
+  user.phoneNumber = phoneNumber.phoneNumber;
+
+  res.status(200).json({
+    status: "Success",
+    user: user,
+  });
+});
 

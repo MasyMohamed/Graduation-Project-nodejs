@@ -9,7 +9,6 @@ datasource db {
 
 model User {
   firebaseId        String              @id @default(uuid())
-  address           String?             @db.VarChar(255)
   phoneNumber       String?             @db.VarChar(20)
   addresses         Address[]
   DeliveryPartner   DeliveryPartner[]
@@ -92,7 +91,7 @@ model OrderItem {
 }
 model Address {
   addressId         Int              @id @default(autoincrement())
-  address           String[]
+  address           String
   firebaseId        String?
   User              User?            @relation(fields: [firebaseId], references: [firebaseId], onDelete: NoAction, onUpdate: NoAction)
   orders            Order[]
