@@ -58,7 +58,7 @@ exports.createOrder = asyncHandler(async (req, res, next) => {
 
 
 exports.getOrderById = asyncHandler(async (req, res, next) => {
-  const { orderId } = req.body;
+  const { orderId } = req.params;
 
   const order = await prisma.order.findUnique({
     where: { orderId: parseInt(orderId) },
@@ -77,7 +77,7 @@ exports.getOrderById = asyncHandler(async (req, res, next) => {
 });
 
 exports.getOrdersByUser = asyncHandler(async (req, res, next) => {
-  const { firebaseId } = req.body;
+  const { firebaseId } = req.params;
 
   const user = await prisma.user.findUnique({
     where: { firebaseId: firebaseId },

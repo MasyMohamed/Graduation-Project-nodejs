@@ -1,4 +1,5 @@
 require("dotenv").config();
+//const postRoutes = require("./routes/predictRouter");
 const express = require("express");
 const app = express();
 const cors = require("cors");
@@ -28,6 +29,8 @@ app.use("/api/users", usersRouter);
 app.use("/api/categories", categoryRouter);
 app.use("/api/cart", cartRouter);
 app.use("/api/order", orderRouter);
+//app.use("/api/model", postRoutes);
+
 app.use("*", (req, _res, next) => {
   next(new AppError(`Can't find ${req.originalUrl} on this server!`, 404));
 });

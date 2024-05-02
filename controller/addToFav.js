@@ -8,7 +8,6 @@ const AppError = require("../utils/AppError");
 exports.toggleFavoriteStatus = asyncHandler(async (req, res, next) => {
   const { firebaseId, productId } = req.body;
 
-  // Find the user by Firebase ID
   const user = await prisma.user.findUnique({
     where: {
       firebaseId: firebaseId,
@@ -22,7 +21,6 @@ exports.toggleFavoriteStatus = asyncHandler(async (req, res, next) => {
     });
   }
 
-  // Find the product by ID
   const product = await prisma.product.findUnique({
     where: {
       id: parseInt(productId),
@@ -38,9 +36,7 @@ exports.toggleFavoriteStatus = asyncHandler(async (req, res, next) => {
 
   let updatedProduct;
 
-  // Toggle the isFavourite status
   if (product.isFavourite) {
-    // Remove the product from favorites
     await prisma.userFavorite.deleteMany({
       where: {
         productId: parseInt(productId),
@@ -56,7 +52,6 @@ exports.toggleFavoriteStatus = asyncHandler(async (req, res, next) => {
       },
     });
   } else {
-    // Add the product to favorites
     await prisma.userFavorite.create({
       data: {
         user: {
