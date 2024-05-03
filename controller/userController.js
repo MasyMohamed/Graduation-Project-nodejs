@@ -158,7 +158,7 @@ exports.getUserById = asyncHandler(async (req, res, next) => {
       firebaseId: firebaseId,
     },
     include: {
-      addresses: true, 
+      addresses: true,
     },
   });
 
@@ -180,9 +180,20 @@ exports.getUserById = asyncHandler(async (req, res, next) => {
 
   user.phoneNumber = phoneNumber.phoneNumber;
 
-  res.status(200).json({
-    status: "Success",
-    user: user,
-  });
-});
+  const formattedAddresses = user.addresses.map(address => ({
+    address: address.address
+  }));
 
+  const response = {
+    status: "Success",
+    user: {
+      firebaseId: user.firebaseId,
+      phoneNumber: user.phoneNumber,
+      role: user.role,
+      avatar: user.avatar,
+      addresses: formattedAddresses,
+    }
+  };
+
+  res.status(200).json(response);
+});
