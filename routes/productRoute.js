@@ -9,11 +9,12 @@ const {
   searchProducts,
 } = require("../controller/product");
 const {
-  addProductToFavorites,
   getAllFavoriteProducts,
-  removeProductFromFavorites,
   toggleFavoriteStatus
 } = require("../controller/addToFav");
+const {
+  recommendProducts 
+} = require("../controller/recommendations");
 const { validateProduct } = require("../utils/validators/productValidator");
 
 router.route("/").get(getAllProducts).post(createProduct);
@@ -35,6 +36,10 @@ router.put("/toggleFavorite", toggleFavoriteStatus);
 router
   .route("/fav/user/:firebaseId")
   .get(getAllFavoriteProducts);
+
+router
+  .route("/recommended/:firebaseId/:profileId")
+  .get(recommendProducts);
 
 
 module.exports = router;
