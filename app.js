@@ -7,7 +7,7 @@ const usersRouter = require("./routes/userRoute");
 const categoryRouter = require("./routes/categoryRoute");
 const orderRouter = require("./routes/orderRouter");
 const cartRouter = require("./routes/cartRoute");
-//const postRoutes = require("./routes/predictRouter");
+const postRoutes = require("./routes/predictRouter");
 const globalErrorHandler = require("./middleware/errorMiddleware");
 const morgan = require("morgan");
 const AppError = require("./utils/AppError");
@@ -29,7 +29,7 @@ app.use("/api/users", usersRouter);
 app.use("/api/categories", categoryRouter);
 app.use("/api/cart", cartRouter);
 app.use("/api/order", orderRouter);
-//app.use("/api/model", postRoutes);
+app.use("/api/model", postRoutes);
 app.use("*", (req, _res, next) => {
   next(new AppError(`Can't find ${req.originalUrl} on this server!`, 404));
 });

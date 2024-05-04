@@ -71,7 +71,7 @@ model CartItem {
 model SkinProfile {
   profileId         Int              @id @default(autoincrement())
   skinType          String
-  firebaseId        String
+  firebaseId        String           @unique
   User              User?            @relation(fields: [firebaseId], references: [firebaseId], onDelete: NoAction, onUpdate: NoAction)
   recommendations   Product[]        @relation("RecommendedProducts")
 }
