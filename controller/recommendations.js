@@ -42,9 +42,9 @@ const recommendProducts = asyncHandler(async (req, res) => {
       });
       break;
     case "combination":
-    case "combinational s":
+    case "Combinational s":
       recommendedProducts = await prisma.product.findMany({
-        where: { skin_type: { in: ["Combination", "Combinational S"] } },
+        where: { skin_type: { in: ["combination", "Combinational S"] } },
       });
       break;
     default:
