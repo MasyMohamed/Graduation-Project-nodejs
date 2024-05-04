@@ -1,4 +1,3 @@
-
 const { PrismaClient } = require("@prisma/client");
 const asyncHandler = require("express-async-handler");
 
@@ -9,7 +8,7 @@ const recommendProducts = asyncHandler(async (req, res) => {
   const parsedProfileId = parseInt(profileId);
 
   const skinProfile = await prisma.skinProfile.findUnique({
-    where: { profileId:parsedProfileId },
+    where: { profileId: parsedProfileId },
     include: { User: true, recommendations: true },
   });
 
@@ -18,28 +17,32 @@ const recommendProducts = asyncHandler(async (req, res) => {
   }
 
   let recommendedProducts = [];
-  switch (skinProfile.skinType) {
-    case "Oily":
-    case "Acne":
-    case "Oily S":
+  switch (skinProfile.skinType.toLowerCase()) {
+    case "oily":
+    case "acne":
+    case "oily s":
       recommendedProducts = await prisma.product.findMany({
-        where: { skin_type: { in: ["Oily", "Acne", "Oily S"] } },
+        where: {
+          skin_type: {
+            in: ["Oily", "Acne", "Oily S"],
+          },
+        },
       });
       break;
-    case "Dry":
-    case "Dry S":
+    case "dry":
+    case "dry s":
       recommendedProducts = await prisma.product.findMany({
         where: { skin_type: { in: ["Dry", "Dry S"] } },
       });
       break;
-    case "Normal":
-    case "Normal S":
+    case "normal":
+    case "normal s":
       recommendedProducts = await prisma.product.findMany({
         where: { skin_type: { in: ["Normal", "Normal S"] } },
       });
       break;
-    case "Combinational":
-    case "Combinational S":
+    case "combinational":
+    case "combinational s":
       recommendedProducts = await prisma.product.findMany({
         where: { skin_type: { in: ["Combinational", "Combinational S"] } },
       });
