@@ -38,7 +38,7 @@ router
   .get(getAllFavoriteProducts);
 
 router
-  .route("/recommended/:firebaseId/:profileId")
+  .route("/recommended/:firebaseId")
   .get(recommendProducts);
 
 

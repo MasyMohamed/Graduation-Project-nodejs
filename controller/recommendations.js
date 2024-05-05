@@ -4,11 +4,10 @@ const asyncHandler = require("express-async-handler");
 const prisma = new PrismaClient();
 
 const recommendProducts = asyncHandler(async (req, res) => {
-  const { firebaseId, profileId } = req.params;
-  const parsedProfileId = parseInt(profileId);
+  const { firebaseId } = req.params;
 
   const skinProfile = await prisma.skinProfile.findUnique({
-    where: { profileId: parsedProfileId },
+    where: { firebaseId: firebaseId },
     include: { User: true, recommendations: true },
   });
 
