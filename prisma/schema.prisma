@@ -50,7 +50,7 @@ model Category {
 model Cart {
   cartId            Int              @id @default(autoincrement())
   totalPrice        Float?
-  firebaseId        String
+  firebaseId        String           @unique
   user              User             @relation(fields: [firebaseId], references: [firebaseId])
   cartItems         CartItem[]
   order             Order?           @relation(fields: [orderId],references: [orderId])
@@ -59,7 +59,7 @@ model Cart {
 
 model CartItem {
   itemId            Int              @id @default(autoincrement())
-  productId         Int
+  productId         Int              @unique
   product           Product          @relation(fields: [productId], references: [id])
   quantity          Int
   cartId            Int
@@ -78,7 +78,7 @@ model SkinProfile {
 
 model OrderItem {
   itemId            Int              @id @default(autoincrement())
-  productId         Int
+  productId         Int              @unique
   product           Product          @relation(fields: [productId], references: [id])
   quantity          Int
   subtotal          Float
@@ -90,7 +90,7 @@ model OrderItem {
 model Address {
   addressId         Int              @id @default(autoincrement())
   address           String
-  firebaseId        String?
+  firebaseId        String?          @unique
   User              User?            @relation(fields: [firebaseId], references: [firebaseId], onDelete: NoAction, onUpdate: NoAction)
   orders            Order[]
 }
@@ -100,7 +100,7 @@ model Order {
   date              DateTime
   totalAmount       Float
   status            String
-  firebaseId        String          
+  firebaseId        String          @unique
   user              User?           @relation(fields: [firebaseId], references: [firebaseId])
   orderItems        OrderItem[]
   addressId         Int?
@@ -114,7 +114,7 @@ model Shipping {
   shippingId        Int              @id @default(autoincrement())
   status            String
   shippingDate      DateTime
-  orderId           Int
+  orderId           Int              @unique
   order             Order            @relation(fields: [orderId], references: [orderId])
   deliveryPartnerId Int?             
   deliveryPartner   DeliveryPartner? @relation(fields: [deliveryPartnerId], references: [deliveryPartnerId])
@@ -169,15 +169,15 @@ enum UserRole {
 }
 model UserFavorite {
   id           Int     @id @default(autoincrement())
-  firebaseId   String
-  productId    Int
+  firebaseId   String  @unique
+  productId    Int     @unique
   user         User    @relation(fields: [firebaseId], references: [firebaseId])
   product      Product @relation(fields: [productId], references: [id])
 }
 
 model SavedCartItem {
   id             Int      @id @default(autoincrement())
-  productId      Int
+  productId      Int      @unique
   quantity       Int
   firebaseId     String
 }
