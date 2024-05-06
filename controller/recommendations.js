@@ -1,9 +1,10 @@
 const { PrismaClient } = require("@prisma/client");
 const asyncHandler = require("express-async-handler");
+const httpStatusCode = require("../utils/httpStatusText");
 
 const prisma = new PrismaClient();
 
-const recommendProducts = asyncHandler(async (req, res) => {
+exports.recommendProducts = asyncHandler(async (req, res) => {
   const { firebaseId } = req.params;
 
   const skinProfile = await prisma.skinProfile.findUnique({
@@ -15,8 +16,10 @@ const recommendProducts = asyncHandler(async (req, res) => {
     return res.status(404).json({ error: "Skin profile not found or invalid" });
   }
 
+  const skinType = skinProfile.skinType.toLowerCase();
+
   let recommendedProducts = [];
-  switch (skinProfile.skinType.toLowerCase()) {
+  switch (skinType) {
     case "oily":
     case "acne":
     case "oily s":
@@ -41,9 +44,9 @@ const recommendProducts = asyncHandler(async (req, res) => {
       });
       break;
     case "combination":
-    case "Combinational s":
+    case "combinational s":
       recommendedProducts = await prisma.product.findMany({
-        where: { skin_type: { in: ["combination", "Combinational S"] } },
+        where: { skin_type: { in: ["Combination", "Combinational S"] } },
       });
       break;
     default:
@@ -52,9 +55,18 @@ const recommendProducts = asyncHandler(async (req, res) => {
         .json({ error: "Invalid skin type in the profile" });
   }
 
-  return res.json(recommendedProducts);
-});
+  const responseData = {
+    products: recommendedProducts.map((product) => ({
+      id: product.id,
+      name: product.name,
+      price: product.price,
+      product_image_url: product.product_image_url,
+    })),
+  };
 
-module.exports = {
-  recommendProducts,
-};
+  return res.status(200).json({
+    status: httpStatusCode.Success,
+    skinType:skinType,
+    data: responseData,
+  });
+});

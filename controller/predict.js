@@ -19,32 +19,38 @@ exports.sendPost = asyncHandler(async (req, res) => {
   const formData = new FormData();
   formData.append("file", file.buffer, { filename: file.originalname });
 
-  const response = await axios.post(url, formData, {
-    headers: {
-      ...formData.getHeaders(),
-    },
-  });
-  const { prediction, probability } = response.data;
-
-  const { firebaseId } = req.params;
-
-  const existingProfile = await prisma.skinProfile.findUnique({
-    where: { firebaseId: firebaseId },
-  });
-
-  if (existingProfile) {
-    await prisma.skinProfile.update({
-      where: { firebaseId: firebaseId },
-      data: { skinType: prediction },
-    });
-  } else {
-    await prisma.skinProfile.create({
-      data: {
-        skinType: prediction,
-        firebaseId: firebaseId,
+  try {
+    const response = await axios.post(url, formData, {
+      headers: {
+        ...formData.getHeaders(),
       },
     });
-  }
 
-  res.json({ prediction, probability });
+    const { prediction, probability } = response.data;
+
+    const { firebaseId } = req.params;
+
+    const existingProfile = await prisma.skinProfile.findUnique({
+      where: { firebaseId: firebaseId },
+    });
+
+    if (existingProfile) {
+      await prisma.skinProfile.update({
+        where: { firebaseId: firebaseId },
+        data: { skinType: prediction },
+      });
+    } else {
+      await prisma.skinProfile.create({
+        data: {
+          skinType: prediction,
+          firebaseId: firebaseId,
+        },
+      });
+    }
+
+    res.json({ prediction, probability });
+  } catch (error) {
+    console.error("Error:", error);
+    res.status(500).json({ prediction: "Unknown", probability: 0 });
+  }
 });
